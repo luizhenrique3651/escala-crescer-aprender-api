@@ -1,4 +1,4 @@
-package com.crescer_aprender.escala.model;
+package com.crescer_aprender.escala.entity;
 
 import java.time.LocalDate;
 import java.util.List;
