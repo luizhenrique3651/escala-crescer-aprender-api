@@ -1,37 +1,33 @@
 package com.crescer_aprender.escala.entity;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
-import java.util.Map;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
 public class Escala {
 
-	@Column(name = "ID_USUARIO")
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long id;
-	
+
 	@Column(name = "MES_ESCALA")
-	Month mes;
-	
+	Integer mes;
+
 	@Column(name = "ANO_ESCALA")
 	Long ano;
-	
+
+	@ElementCollection
 	@Column(name = "DATAS_ESCALA")
 	List<LocalDate> datas;
-	
-	@Column(name = "VOLUNTARIO")
+
+	@ManyToMany
+	@JoinTable(
+			name = "escala_voluntario",
+			joinColumns = @JoinColumn(name = "escala_id"),
+			inverseJoinColumns = @JoinColumn(name = "voluntario_id")
+	)
 	List<Voluntario> voluntarios;
-	
-	
 }
