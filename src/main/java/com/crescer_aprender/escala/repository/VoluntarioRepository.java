@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.crescer_aprender.escala.entity.Voluntario;
@@ -12,8 +14,9 @@ import com.crescer_aprender.escala.entity.Voluntario;
 @Repository
 public interface VoluntarioRepository extends JpaRepository<Voluntario, Long>{
 
-	Optional<List<Voluntario>> findVoluntarioByData(LocalDate data);
-	
-	
-	
+    @Query("SELECT v FROM Voluntario v JOIN v.datasDisponiveis d WHERE d = :data")
+    Optional<List<Voluntario>> findVoluntarioByData(@Param("data") LocalDate data);
+
+
+
 }
