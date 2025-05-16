@@ -2,6 +2,7 @@ package com.crescer_aprender.escala.service;
 
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public class VoluntarioService {
 
     private final VoluntarioRepository repository;
 
+    @Autowired
     public VoluntarioService(VoluntarioRepository repository) {
         this.repository = repository;
     }
@@ -20,8 +22,8 @@ public class VoluntarioService {
         return repository.save(voluntario);
     }
 
-    public List<Voluntario> loadAll() {
-        return repository.findAll();
+    public Optional<List<Voluntario>> loadAll() {
+        return Optional.of(repository.findAll());
     }
 
     public Optional<Voluntario> update(Long id, Voluntario voluntario) {
