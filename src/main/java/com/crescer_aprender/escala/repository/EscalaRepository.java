@@ -15,5 +15,7 @@ import com.crescer_aprender.escala.entity.Voluntario;
 public interface EscalaRepository extends JpaRepository<Escala, Long>{
     @Query("SELECT esc FROM Escala esc JOIN esc.voluntarios v WHERE esc.mes = :mes AND esc.ano = :ano AND v = :voluntario")
     Optional<Escala> findEscalaByMesAnoVoluntario(@Param("mes") Integer mes, @Param("ano") Long ano, @Param("voluntario") Voluntario voluntario);
+
+    Optional<Escala> findByAnoAndMes(Long ano, Integer mes);
 }
 
