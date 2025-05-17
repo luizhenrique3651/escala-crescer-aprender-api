@@ -2,9 +2,10 @@ package com.crescer_aprender.escala.service;
 
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.ConstantExceptionUtil;
+import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.InvalidVoluntarioDataException;
-import com.crescer_aprender.escala.exception.VoluntarioNotFoundException;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
+import org.hibernate.action.internal.EntityActionVetoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class VoluntarioService {
 
     public Voluntario update(Long id, Voluntario voluntario) {
         Voluntario oldVoluntario = repository.findById(id)
-                .orElseThrow(() -> new VoluntarioNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException("Voluntário", id));
 
         Optional.ofNullable(voluntario.getNome()).ifPresent(oldVoluntario::setNome);
         Optional.ofNullable(voluntario.getEmail()).ifPresent(oldVoluntario::setEmail);

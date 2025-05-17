@@ -28,7 +28,7 @@ public class VoluntarioController {
     }
     @PutMapping("/update")
     public Optional<Voluntario> update(Long id, Voluntario voluntario){
-        return service.update(id, voluntario);
+        return Optional.of(service.update(id, voluntario));
     }
     @DeleteMapping("/delete")
     public Boolean delete(Long id){
