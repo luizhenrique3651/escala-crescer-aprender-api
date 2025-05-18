@@ -5,7 +5,6 @@ import com.crescer_aprender.escala.exception.ConstantExceptionUtil;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.InvalidVoluntarioDataException;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
-import org.hibernate.action.internal.EntityActionVetoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,33 +38,33 @@ public class VoluntarioService {
     }
 
     public Voluntario update(Long id, Voluntario voluntario) {
-        Voluntario oldVoluntario = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Voluntário", id));
+        Voluntario oldVoluntario = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Voluntário", id));
 
         Optional.ofNullable(voluntario.getNome()).ifPresent(oldVoluntario::setNome);
         Optional.ofNullable(voluntario.getEmail()).ifPresent(oldVoluntario::setEmail);
         Optional.ofNullable(voluntario.getSenha()).ifPresent(oldVoluntario::setSenha);
-        Optional.ofNullable(voluntario.getDatasDisponiveis())
-                .ifPresent(dates -> mergeDatasDisponiveis(oldVoluntario, dates));
+        Optional.ofNullable(voluntario.getDatasDisponiveis()).ifPresent(dates -> mergeDatasDisponiveis(oldVoluntario, dates));
 
         return repository.save(oldVoluntario);
+    }
+
+    public Optional<List<Voluntario>> findVoluntariosByData(LocalDate data) {
+        return repository.findVoluntariosByData(data);
     }
 
     private void mergeDatasDisponiveis(Voluntario voluntario, List<LocalDate> novasDatas) {
         List<LocalDate> datasAtuais = voluntario.getDatasDisponiveis();
 
         datasAtuais.removeIf(date -> !novasDatas.contains(date));
-        novasDatas.stream()
-                .filter(date -> !datasAtuais.contains(date))
-                .forEach(datasAtuais::add);
+        novasDatas.stream().filter(date -> !datasAtuais.contains(date)).forEach(datasAtuais::add);
     }
-
 
     public boolean delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return true;
+        } else {
+            throw new EntityNotFoundException("Voluntário", id);
         }
-        return false;
     }
 }
