@@ -14,24 +14,33 @@ import java.util.Optional;
 public class EscalaService {
 
     private final EscalaRepository repository;
+
     @Autowired
     public EscalaService(EscalaRepository repository) {
         this.repository = repository;
     }
 
-    public Optional<List<Escala>> loadAll(){
+    public Optional<Escala> findEscalaByMesAnoVoluntario(Integer mes, Long ano, Voluntario voluntario) {
+        return repository.findEscalaByMesAnoVoluntario(mes, ano, voluntario);
+    }
+
+    public Optional<Escala> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    public Optional<List<Escala>> loadAll() {
         return Optional.of(repository.findAll());
     }
 
-    public Escala save(Escala escala){
+    public Escala save(Escala escala) {
         Optional<Escala> escalaExistente = repository.findByAnoAndMes(escala.getAno(), escala.getMes());
-        if(escalaExistente.isPresent()){
+        if (escalaExistente.isPresent()) {
             throw new EscalaAlreadyExistsException(escala.getAno(), escala.getMes());
         }
-            return repository.save(escala);
+        return repository.save(escala);
     }
 
-    public Escala update(Long id, Escala escala){
+    public Escala update(Long id, Escala escala) {
         Escala oldEscala = repository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Escala", id));
 
@@ -39,7 +48,24 @@ public class EscalaService {
         Optional.ofNullable(escala.getMes()).ifPresent(oldEscala::setMes);
         Optional.ofNullable(escala.getDatas())
                 .ifPresent(dates -> mergeDatas(oldEscala, dates));
+        Optional.ofNullable(escala.getVoluntarios()).ifPresent(voluntarios -> mergeVoluntarios(oldEscala, voluntarios));
+        return repository.save(oldEscala);
+    }
 
+    public boolean delete(Long id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return true;
+        } else {
+            throw new EntityNotFoundException("Escala", id);
+        }
+    }
+
+    private void mergeVoluntarios(Escala escala, List<Voluntario> novosVoluntarios) {
+        List<Voluntario> voluntariosAtuais = escala.getVoluntarios();
+
+        voluntariosAtuais.removeIf(voluntario -> !novosVoluntarios.contains(voluntario));
+        novosVoluntarios.stream().filter(voluntario -> !voluntariosAtuais.contains(voluntario)).forEach(voluntariosAtuais::add);
 
     }
 
