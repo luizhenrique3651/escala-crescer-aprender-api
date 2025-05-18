@@ -15,7 +15,7 @@ import com.crescer_aprender.escala.entity.Voluntario;
 public interface VoluntarioRepository extends JpaRepository<Voluntario, Long>{
 
     @Query("SELECT v FROM Voluntario v JOIN v.datasDisponiveis d WHERE d = :data")
-    Optional<List<Voluntario>> findVoluntarioByData(@Param("data") LocalDate data);
+    Optional<List<Voluntario>> findVoluntariosByData(@Param("data") LocalDate data);
 
 
 
