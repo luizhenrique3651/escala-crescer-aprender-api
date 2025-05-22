@@ -1,0 +1,27 @@
+meta {
+  name: Criar Voluntario
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/crescer-aprender/voluntarios
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nome": "Jo\u00e3o Silva",
+    "email": "joao@exemplo.com",
+    "senha": "senha123",
+    "datasDisponiveis": [
+      "2025-06-01",
+      "2025-06-15"
+    ]
+  }
+}

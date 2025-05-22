@@ -1,0 +1,34 @@
+meta {
+  name: Criar Escala
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/crescer-aprender/escala
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "mes": 6,
+    "ano": 2025,
+    "datas": [
+      "2025-06-01",
+      "2025-06-15"
+    ],
+    "voluntarios": [
+      {
+        "id": 1
+      },
+      {
+        "id": 2
+      }
+    ]
+  }
+}

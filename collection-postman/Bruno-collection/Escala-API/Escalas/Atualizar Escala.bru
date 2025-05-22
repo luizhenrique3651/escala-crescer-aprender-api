@@ -1,0 +1,31 @@
+meta {
+  name: Atualizar Escala
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/crescer-aprender/escala/1
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "mes": 7,
+    "ano": 2025,
+    "datas": [
+      "2025-07-01",
+      "2025-07-20"
+    ],
+    "voluntarios": [
+      {
+        "id": 1
+      }
+    ]
+  }
+}

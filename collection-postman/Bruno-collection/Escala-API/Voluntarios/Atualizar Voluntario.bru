@@ -1,0 +1,31 @@
+meta {
+  name: Atualizar Voluntario
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/crescer-aprender/voluntarios/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nome": "Jo\u00e3o Atualizado",
+    "email": "joao@exemplo.com",
+    "senha": "novaSenha",
+    "datasDisponiveis": [
+      "2025-06-01",
+      "2025-06-20"
+    ]
+  }
+}

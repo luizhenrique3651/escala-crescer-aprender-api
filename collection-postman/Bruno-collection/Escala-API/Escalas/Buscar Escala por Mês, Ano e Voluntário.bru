@@ -1,0 +1,32 @@
+meta {
+  name: Buscar Escala por Mês, Ano e Voluntário
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/crescer-aprender/escala/buscar-por-mes-ano-voluntario?mes=6&ano=2025
+  body: json
+  auth: none
+}
+
+params:query {
+  mes: 6
+  ano: 2025
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "id": 1,
+    "nome": "Jo\u00e3o Silva",
+    "email": "joao@exemplo.com",
+    "senha": "senha123",
+    "datasDisponiveis": [
+      "2025-06-01"
+    ]
+  }
+}
