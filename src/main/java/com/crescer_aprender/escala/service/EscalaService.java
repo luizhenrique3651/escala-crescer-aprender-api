@@ -6,11 +6,12 @@ import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
+@Service
 public class EscalaService {
 
     private final EscalaRepository repository;

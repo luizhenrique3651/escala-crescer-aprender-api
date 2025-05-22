@@ -1,0 +1,255 @@
+{
+  "info": {
+    "name": "BrunoApi",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Escala",
+      "item": [
+        {
+          "name": "Get All Escalas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/escala",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "escala"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Escala By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/escala/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "escala",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Escala",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ano\": 2024,\n  \"mes\": 5,\n  \"datas\": [\n    \"2024-05-10\"\n  ],\n  \"voluntarios\": [\n    {\n      \"id\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/escala",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "escala"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Escala",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ano\": 2025,\n  \"mes\": 6,\n  \"datas\": [\n    \"2025-06-15\"\n  ],\n  \"voluntarios\": [\n    {\n      \"id\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/escala/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "escala",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Escala",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/escala/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "escala",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Escala por M\u00eas, Ano e Volunt\u00e1rio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/escala/buscar-por-mes-ano-voluntario?mes=5&ano=2024",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "escala",
+                "buscar-por-mes-ano-voluntario"
+              ],
+              "query": [
+                {
+                  "key": "mes",
+                  "value": "5"
+                },
+                {
+                  "key": "ano",
+                  "value": "2024"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Voluntario",
+      "item": [
+        {
+          "name": "Get All Voluntarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "voluntarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Voluntario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Bruno\",\n  \"email\": \"bruno@email.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/voluntarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "voluntarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Voluntario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Bruno Alterado\",\n  \"email\": \"novo@email.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/voluntarios/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "voluntarios",
+                ":id"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Voluntario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/crescer-aprender/voluntarios/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crescer-aprender",
+                "voluntarios",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

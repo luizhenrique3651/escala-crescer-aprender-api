@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17
+    container_name: javeiro-postgres
+    environment:
+      POSTGRES_USER: luiz
+      POSTGRES_PASSWORD: luiz123
+      POSTGRES_DB: crescer-aprender-db
+    ports:
+      - "5432:5432"
+    networks:
+      - escala-net
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: escala-app
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/crescer-aprender-db
+      SPRING_DATASOURCE_USERNAME: luiz
+      SPRING_DATASOURCE_PASSWORD: luiz123
+    networks:
+      - escala-net
+
+networks:
+  escala-net:
+
+volumes:
+  pgdata:
