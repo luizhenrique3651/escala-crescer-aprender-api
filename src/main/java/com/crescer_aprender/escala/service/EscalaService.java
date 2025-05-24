@@ -5,20 +5,25 @@ import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
 import com.crescer_aprender.escala.repository.EscalaRepository;
+import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 @Service
 public class EscalaService {
 
     private final EscalaRepository repository;
+    private final VoluntarioRepository voluntarioRepository;
 
     @Autowired
-    public EscalaService(EscalaRepository repository) {
+    public EscalaService(EscalaRepository repository, VoluntarioRepository voluntarioRepository) {
         this.repository = repository;
+        this.voluntarioRepository = voluntarioRepository;
     }
 
     public Optional<Escala> findEscalaByMesAnoVoluntario(Integer mes, Long ano, Voluntario voluntario) {
@@ -37,6 +42,19 @@ public class EscalaService {
         Optional<Escala> escalaExistente = repository.findByAnoAndMes(escala.getAno(), escala.getMes());
         if (escalaExistente.isPresent()) {
             throw new EscalaAlreadyExistsException(escala.getAno(), escala.getMes());
+        }
+        List<Voluntario> voluntariosDisponiveis = new ArrayList<>();
+        for(LocalDate data : escala.getDatas()){
+            Optional<List<Voluntario>> listaVoluntarios = voluntarioRepository.findVoluntariosByData(data);
+            if(listaVoluntarios.isPresent()){
+                /*verifica se as duas listas de voluntarios tem objetos repetidos e retira de uma para
+                 adicionar depois o restante na outra*/
+                listaVoluntarios.get().removeIf(v -> voluntariosDisponiveis.contains(v));
+                voluntariosDisponiveis.addAll(listaVoluntarios.get());
+            }
+        }
+        if(escala.getVoluntarios() == null || escala.getVoluntarios().isEmpty()) {
+            escala.getVoluntarios().addAll(voluntariosDisponiveis);
         }
         return repository.save(escala);
     }
