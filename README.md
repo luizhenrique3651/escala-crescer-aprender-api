@@ -19,13 +19,13 @@ A API **Escala API** automatiza esse processo de organização, ajudando a equip
 
 ## 🚀 Funcionalidades (em desenvolvimento)
 
-- [ ] Cadastro de voluntários.
-- [ ] Registro de disponibilidade de cada voluntário.
-- [ ] Cadastro de datas de aulas.
-- [ ] Geração automática da escala com base nas regras (mínimo/máximo por aula).
-- [ ] Visualização da escala por data.
-- [ ] Visualização da escala por voluntário.
-- [ ] Edição manual de escalas.
+- [✅] Cadastro de voluntários.
+- [✅] Registro de disponibilidade de cada voluntário.
+- [✅] Cadastro de datas de aulas.
+- [✅] Geração automática da escala com base nas regras (mínimo/máximo por aula).
+- [✅] Visualização da escala por data.
+- [] Visualização da escala por voluntário.
+- [✅] Edição manual de escalas.
 - [ ] Autenticação e autorização (para admin/coordenadores do projeto).
 
 ## 📌 Sobre o Projeto Crescer e Aprender
