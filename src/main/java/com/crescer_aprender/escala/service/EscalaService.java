@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class EscalaService {
 
@@ -44,16 +45,21 @@ public class EscalaService {
             throw new EscalaAlreadyExistsException(escala.getAno(), escala.getMes());
         }
         List<Voluntario> voluntariosDisponiveis = new ArrayList<>();
-        for(LocalDate data : escala.getDatas()){
+        for (LocalDate data : escala.getDatas()) {
             Optional<List<Voluntario>> listaVoluntarios = voluntarioRepository.findVoluntariosByData(data);
-            if(listaVoluntarios.isPresent()){
+            if (listaVoluntarios.isPresent()) {
                 /*verifica se as duas listas de voluntarios tem objetos repetidos e retira de uma para
                  adicionar depois o restante na outra*/
                 listaVoluntarios.get().removeIf(v -> voluntariosDisponiveis.contains(v));
-                voluntariosDisponiveis.addAll(listaVoluntarios.get());
+                if (voluntariosDisponiveis.size() + listaVoluntarios.get().size() > 8) {
+                    voluntariosDisponiveis.addAll(listaVoluntarios.get().subList(0, 8 - voluntariosDisponiveis.size()));
+                } else {
+                    voluntariosDisponiveis.addAll(listaVoluntarios.get());
+                }
             }
+
         }
-        if(escala.getVoluntarios() == null || escala.getVoluntarios().isEmpty()) {
+        if (escala.getVoluntarios() == null || escala.getVoluntarios().isEmpty()) {
             escala.getVoluntarios().addAll(voluntariosDisponiveis);
         }
         return repository.save(escala);
