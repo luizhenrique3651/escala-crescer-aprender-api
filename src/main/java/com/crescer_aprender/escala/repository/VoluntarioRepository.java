@@ -17,6 +17,8 @@ public interface VoluntarioRepository extends JpaRepository<Voluntario, Long>{
     @Query("SELECT v FROM Voluntario v JOIN v.datasDisponiveis d WHERE d = :data")
     Optional<List<Voluntario>> findVoluntariosByData(@Param("data") LocalDate data);
 
+    Boolean existsByEmail(String email);
+
 
 
 }

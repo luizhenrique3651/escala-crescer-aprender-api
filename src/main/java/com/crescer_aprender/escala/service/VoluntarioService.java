@@ -2,10 +2,7 @@ package com.crescer_aprender.escala.service;
 
 import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.Voluntario;
-import com.crescer_aprender.escala.exception.ConstantExceptionUtil;
-import com.crescer_aprender.escala.exception.EntityNotFoundException;
-import com.crescer_aprender.escala.exception.InvalidVoluntarioDataException;
-import com.crescer_aprender.escala.exception.VoluntarioIsScheduledException;
+import com.crescer_aprender.escala.exception.*;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +30,9 @@ public class VoluntarioService {
         }
         if (voluntario.getEmail() == null || !voluntario.getEmail().contains("@")) {
             throw new InvalidVoluntarioDataException(ConstantExceptionUtil.INVALID_VOLUNTARIO_EMAIL);
+        }
+        if(repository.existsByEmail(voluntario.getEmail())){
+            throw new EmailAlreadyExistsException(voluntario.getEmail());
         }
         return repository.save(voluntario);
     }
