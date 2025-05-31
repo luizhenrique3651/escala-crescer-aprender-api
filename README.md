@@ -24,7 +24,7 @@ A API **Escala API** automatiza esse processo de organização, ajudando a equip
 - [✅] Cadastro de datas de aulas.
 - [✅] Geração automática da escala com base nas regras (mínimo/máximo por aula).
 - [✅] Visualização da escala por data.
-- [] Visualização da escala por voluntário.
+- [ ] Visualização da escala por voluntário.
 - [✅] Edição manual de escalas.
 - [ ] Autenticação e autorização (para admin/coordenadores do projeto).
 
