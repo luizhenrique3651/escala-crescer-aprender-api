@@ -1,7 +1,9 @@
 package com.crescer_aprender.escala.controller;
 
+import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.EmailAlreadyExistsException;
+import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.VoluntarioIsScheduledException;
 import com.crescer_aprender.escala.service.VoluntarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,29 +32,32 @@ public class VoluntarioController {
     }
 
     @PostMapping
-    public ResponseEntity<String> save(@RequestBody Voluntario voluntario) {
-        try{
+    public ResponseEntity<Voluntario> save(@RequestBody Voluntario voluntario) {
+        try {
             Voluntario saved = service.save(voluntario);
-            return ResponseEntity.ok(saved.toString());
-
+            return ResponseEntity.ok(saved);
         } catch (EmailAlreadyExistsException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Voluntario> update(@PathVariable Long id, @RequestBody Voluntario voluntario) {
-        Voluntario updated = service.update(id, voluntario);
-        return ResponseEntity.ok(updated);
+        try {
+            Voluntario updated = service.update(id, voluntario);
+            return ResponseEntity.ok(updated);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
-      try {
-          service.delete(id);
-          return ResponseEntity.noContent().build();
-      } catch (VoluntarioIsScheduledException e) {
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-      }
+    public ResponseEntity<Voluntario> delete(@PathVariable Long id) {
+        try {
+            service.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (VoluntarioIsScheduledException e) {
+            return new ResponseEntity(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
     }
 }

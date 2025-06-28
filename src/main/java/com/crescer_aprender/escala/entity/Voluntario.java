@@ -31,4 +31,7 @@ public class Voluntario {
 	@ElementCollection
 	@Column(name = "DATAS_DISPONIVEIS")
 	List<LocalDate> datasDisponiveis;
+
+	@Column(name = "MENSAGEM_ERRO")
+	String errorMessage;
 }

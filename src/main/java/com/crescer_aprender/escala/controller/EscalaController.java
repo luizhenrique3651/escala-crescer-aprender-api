@@ -74,9 +74,10 @@ public class EscalaController {
             @RequestParam Integer mes,
             @RequestParam Long ano,
             @RequestBody Voluntario voluntario) {
-
-        return escalaService.findEscalaByMesAnoVoluntario(mes, ano, voluntario)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(escalaService.findEscalaByMesAnoVoluntario(mes, ano, voluntario).get());
+        }catch (EntityNotFoundException e) {
+            return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
+        }
     }
 }
