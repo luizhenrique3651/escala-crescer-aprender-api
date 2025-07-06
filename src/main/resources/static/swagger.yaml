@@ -1,0 +1,165 @@
+openapi: 3.0.4
+info:
+  title: Escala API - Crescer e Aprender
+  description: |-
+    Escala API é uma API desenvolvida para facilitar o cadastro e o controle de escalas de voluntários do projeto social Crescer e Aprender. Esse projeto tem como missão oferecer aulas gratuitas de Informática, Matemática e Língua Portuguesa para crianças em situação de vulnerabilidade social.
+
+    Links úteis:
+    - [Repositório no GitHub](https://github.com/luizhenrique3651/escala-crescer-aprender-api)
+    - [Instagram do projeto Crescer e Aprender](https://www.instagram.com/proj_crescereaprender/)
+  termsOfService: https://swagger.io/terms/
+  contact:
+    email: uizhenrique@gmail.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+tags:
+  - name: Escala
+    description: Operações de Escala
+  - name: Voluntario
+    description: Entidade Voluntário
+
+paths:
+  /escala:
+    post:
+      tags:
+        - Escala
+      summary: Cadastra uma nova Escala
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Escala'
+      responses:
+        '200':
+          description: Escala criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escala'
+        '400':
+          description: Requisição inválida
+
+  /escala/{id}:
+    get:
+      tags:
+        - Escala
+      summary: Busca Escala por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Escala encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escala'
+        '404':
+          description: Escala não encontrada
+
+    put:
+      tags:
+        - Escala
+      summary: Atualiza uma Escala existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Escala'
+      responses:
+        '200':
+          description: Escala atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escala'
+        '404':
+          description: Escala não encontrada
+
+    delete:
+      tags:
+        - Escala
+      summary: Remove uma Escala
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Escala removida
+        '404':
+          description: Escala não encontrada
+
+components:
+  schemas:
+    Escala:
+      required:
+        - mes
+        - ano
+        - datas
+        - voluntarios
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        mes:
+          type: integer
+          example: 7
+          description: Mês da escala (1-12)
+        ano:
+          type: integer
+          example: 2025
+          description: Ano da escala
+        datas:
+          type: array
+          description: Lista de datas da escala
+          items:
+            type: string
+            format: date
+        voluntarios:
+          type: array
+          description: Voluntários da escala
+          items:
+            $ref: '#/components/schemas/Voluntario'
+
+    Voluntario:
+      required:
+        - nome
+        - email
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: João da Silva
+        email:
+          type: string
+          example: joao@email.com
+        senha:
+          type: string
+          format: password
+          example: senhaSegura123
+        datasDisponiveis:
+          type: array
+          items:
+            type: string
+            format: date
+          description: Datas disponíveis do voluntário
