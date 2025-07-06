@@ -28,7 +28,12 @@ public class EscalaService {
     }
 
     public Optional<Escala> findEscalaByMesAnoVoluntario(Integer mes, Long ano, Voluntario voluntario) {
-        return repository.findEscalaByMesAnoVoluntario(mes, ano, voluntario);
+        Optional<Escala> retorno = repository.findEscalaByMesAnoVoluntario(mes, ano, voluntario);
+        if(retorno.isPresent()){
+            return retorno;
+        }else{
+            throw new EntityNotFoundException("Escala não encontrada em "+mes+"/"+ano+" com o Voluntário: "+voluntario.toString());
+        }
     }
 
     public Optional<Escala> findById(Long id) {

@@ -3,10 +3,16 @@ package com.crescer_aprender.escala.entity;
 import java.time.LocalDate;
 import java.util.List;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Escala {
 
 	@Id
@@ -30,4 +36,7 @@ public class Escala {
 			inverseJoinColumns = @JoinColumn(name = "voluntario_id")
 	)
 	List<Voluntario> voluntarios;
+
+	@Column(name = "MENSAGEM_ERRO")
+	String errorMessage;
 }
