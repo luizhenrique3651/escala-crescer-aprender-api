@@ -27,7 +27,7 @@ public class EscalaService {
         this.voluntarioRepository = voluntarioRepository;
     }
 
-    public Optional<Escala> findEscalaByMesAnoVoluntario(Integer mes, Long ano, Voluntario voluntario) {
+    public Optional<Escala> findEscalaByMesAnoVoluntario(Integer mes, Long ano, Long voluntario) {
         Optional<Escala> retorno = repository.findEscalaByMesAnoVoluntario(mes, ano, voluntario);
         if(retorno.isPresent()){
             return retorno;

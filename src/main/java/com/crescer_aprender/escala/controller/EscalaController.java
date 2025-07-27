@@ -69,13 +69,13 @@ public class EscalaController {
         }
     }
 
-    @PostMapping("/buscar-por-mes-ano-voluntario")
+    @GetMapping("/buscar-por-mes-ano-voluntario")
     public ResponseEntity<Escala> findByMesAnoVoluntario(
             @RequestParam Integer mes,
             @RequestParam Long ano,
-            @RequestBody Voluntario voluntario) {
+            @RequestParam Long idVoluntario) {
         try {
-            return ResponseEntity.ok(escalaService.findEscalaByMesAnoVoluntario(mes, ano, voluntario).get());
+            return ResponseEntity.ok(escalaService.findEscalaByMesAnoVoluntario(mes, ano, idVoluntario).get());
         }catch (EntityNotFoundException e) {
             return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
