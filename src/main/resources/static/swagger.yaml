@@ -22,6 +22,22 @@ tags:
 
 paths:
   /crescer-aprender/escala:
+    get:
+      tags:
+        - Escala
+      summary: Lista todas as escalas
+      responses:
+        '200':
+          description: Lista de escalas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Escala'
+        '204':
+          description: Nenhuma escala encontrada
+
     post:
       tags:
         - Escala
@@ -105,6 +121,117 @@ paths:
         '404':
           description: Escala não encontrada
 
+  /crescer-aprender/escala/buscar-por-mes-ano-voluntario:
+    get:
+      tags:
+        - Escala
+      summary: Busca escala por mês, ano e voluntário
+      parameters:
+        - name: mes
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: ano
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: idVoluntario
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Escala encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escala'
+        '404':
+          description: Escala não encontrada
+
+  /crescer-aprender/voluntarios:
+    get:
+      tags:
+        - Voluntario
+      summary: Lista todos os voluntários
+      responses:
+        '200':
+          description: Lista de voluntários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Voluntario'
+        '204':
+          description: Nenhum voluntário encontrado
+
+    post:
+      tags:
+        - Voluntario
+      summary: Cadastra um novo voluntário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Voluntario'
+      responses:
+        '200':
+          description: Voluntário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voluntario'
+        '400':
+          description: E-mail já existente
+
+  /crescer-aprender/voluntarios/{id}:
+    put:
+      tags:
+        - Voluntario
+      summary: Atualiza um voluntário existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Voluntario'
+      responses:
+        '200':
+          description: Voluntário atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voluntario'
+        '404':
+          description: Voluntário não encontrado
+
+    delete:
+      tags:
+        - Voluntario
+      summary: Remove um voluntário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Voluntário removido com sucesso
+        '422':
+          description: Voluntário está em uma escala existente
+
 components:
   schemas:
     Escala:
@@ -137,6 +264,9 @@ components:
           description: Voluntários da escala
           items:
             $ref: '#/components/schemas/Voluntario'
+        errorMessage:
+          type: string
+          example: 'Erro ao salvar escala'
 
     Voluntario:
       required:
@@ -163,3 +293,6 @@ components:
             type: string
             format: date
           description: Datas disponíveis do voluntário
+        errorMessage:
+          type: string
+          example: 'E-mail já está em uso'
