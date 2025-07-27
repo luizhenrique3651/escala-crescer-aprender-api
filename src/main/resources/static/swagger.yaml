@@ -1,4 +1,4 @@
-openapi: 3.0.4
+openapi: 3.0.0
 info:
   title: Escala API - Crescer e Aprender
   description: |-
@@ -21,7 +21,7 @@ tags:
     description: Entidade Voluntário
 
 paths:
-  /escala:
+  /crescer-aprender/escala:
     post:
       tags:
         - Escala
@@ -42,7 +42,7 @@ paths:
         '400':
           description: Requisição inválida
 
-  /escala/{id}:
+  /crescer-aprender/escala/{id}:
     get:
       tags:
         - Escala
