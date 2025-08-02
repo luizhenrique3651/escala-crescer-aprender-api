@@ -130,7 +130,6 @@ Este projeto é **open source** e colaborações são muito bem-vindas! Para con
 ## 📞 Contato
 
 - Desenvolvedor: Luiz Henrique
-- Email: uizhenrique@gmail.com
 - GitHub: [luizhenrique3651/escala-crescer-aprender-api](https://github.com/luizhenrique3651/escala-crescer-aprender-api)
 - Instagram do projeto: [proj_crescereaprender](https://www.instagram.com/proj_crescereaprender/)
 
