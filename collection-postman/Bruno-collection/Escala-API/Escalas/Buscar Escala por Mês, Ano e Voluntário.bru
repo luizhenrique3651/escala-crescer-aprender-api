@@ -5,28 +5,17 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/crescer-aprender/escala/buscar-por-mes-ano-voluntario?mes=6&ano=2025
-  body: json
+  url: {{baseUrl}}/crescer-aprender/escala/buscar-por-mes-ano-voluntario?mes=6&ano=2025&idVoluntario=1
+  body: none
   auth: none
 }
 
 params:query {
   mes: 6
   ano: 2025
+  idVoluntario: 1
 }
 
 headers {
   Content-Type: application/json
-}
-
-body:json {
-  {
-    "id": 1,
-    "nome": "João Silva",
-    "email": "joao@exemplo.com",
-    "senha": "senha123",
-    "datasDisponiveis": [
-      "2025-06-01"
-    ]
-  }
 }
