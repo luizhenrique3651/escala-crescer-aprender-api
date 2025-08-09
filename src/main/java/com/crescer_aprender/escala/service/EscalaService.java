@@ -4,6 +4,7 @@ import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
+import com.crescer_aprender.escala.exception.VoluntarioNotExistException;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EscalaService {
@@ -64,10 +66,26 @@ public class EscalaService {
             }
 
         }
+
+        List<Long> ids = voluntariosDisponiveis.stream()
+                .map(Voluntario::getId)
+                .collect(Collectors.toList());
+
+        Optional<List<Voluntario>> voluntariosExistentes = voluntarioRepository.findVoluntariosByIds(ids);
+        if(voluntariosExistentes.isPresent()) {
+            if (ids.size() > voluntariosExistentes.get().size()) {
+                ids.removeIf(v -> (voluntariosExistentes.get().stream().map(Voluntario::getId).equals(v)));
+                throw new VoluntarioNotExistException(ids);
+            }
+        }else{
+            throw new VoluntarioNotExistException(ids);
+        }
+
         if (escala.getVoluntarios() == null || escala.getVoluntarios().isEmpty()) {
             escala.getVoluntarios().addAll(voluntariosDisponiveis);
         }
         return repository.save(escala);
+
     }
 
     public Escala update(Long id, Escala escala) {

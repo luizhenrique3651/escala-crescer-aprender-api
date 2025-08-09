@@ -4,6 +4,7 @@ import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
+import com.crescer_aprender.escala.exception.VoluntarioNotExistException;
 import com.crescer_aprender.escala.service.EscalaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,8 @@ public class EscalaController {
             return ResponseEntity.ok(saved);
         } catch (EscalaAlreadyExistsException e) {
             return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+        } catch(VoluntarioNotExistException e){
+            return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
     }
 

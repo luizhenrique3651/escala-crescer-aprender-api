@@ -19,6 +19,9 @@ public interface VoluntarioRepository extends JpaRepository<Voluntario, Long>{
 
     Boolean existsByEmail(String email);
 
+    @Query("SELECT v FROM Voluntario v WHERE v.id IN :ids")
+    Optional<List<Voluntario>> findVoluntariosByIds(@Param("ids") List<Long> ids);
+
 
 
 }
