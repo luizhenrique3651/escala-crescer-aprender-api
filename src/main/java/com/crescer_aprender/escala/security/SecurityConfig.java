@@ -1,6 +1,7 @@
 package com.crescer_aprender.escala.security;
 
 import org.springframework.context.annotation.*;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,9 +18,10 @@ public class SecurityConfig {
                         .requestMatchers("/publico/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin();
+                .formLogin(Customizer.withDefaults());
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
