@@ -48,7 +48,6 @@ class EscalaServiceTest {
         return Voluntario.builder()
                 .id(id)
                 .nome("Voluntario " + id)
-                .email("vol" + id + "@email.com")
                 .datasDisponiveis(Arrays.asList(LocalDate.of(2025, 7, 5), LocalDate.of(2025, 7, 12)))
                 .build();
     }
@@ -142,7 +141,7 @@ class EscalaServiceTest {
         when(voluntarioRepository.findVoluntariosByData(LocalDate.of(2025, 7, 12)))
                 .thenReturn(Optional.of(new ArrayList<>(voluntariosDisponiveisData2)));
         when(escalaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(voluntarioRepository.findVoluntariosByIds(List.of(1L, 2L, 3L, 4L, 5L))).thenReturn(Optional.of(todosVoluntariosDisponiveisNasDuasDatas));
+        when(voluntarioRepository.findVoluntariosByIds(List.of(1L, 2L, 3L, 4L))).thenReturn(Optional.of(todosVoluntariosDisponiveisNasDuasDatas));
 
         Escala saved = escalaService.save(escala);
         assertNotNull(saved);

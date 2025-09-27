@@ -22,11 +22,9 @@ public class Voluntario {
 	@Column(name = "NOM_USUARIO")
 	String nome;
 
-	@Column(name = "EMAIL_USUARIO")
-	String email;
-
-	@Column(name = "SENHA_USUARIO")
-	String senha;
+	@OneToOne
+	@JoinColumn(name = "USUARIO_ID")
+	Usuario usuario;
 
 	@ElementCollection
 	@Column(name = "DATAS_DISPONIVEIS")

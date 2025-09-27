@@ -28,12 +28,12 @@ public class VoluntarioService {
         if (voluntario.getNome() == null || voluntario.getNome().isEmpty()) {
             throw new InvalidVoluntarioDataException(ConstantExceptionUtil.INVALID_VOLUNTARIO_NAME);
         }
-        if (voluntario.getEmail() == null || !voluntario.getEmail().contains("@")) {
-            throw new InvalidVoluntarioDataException(ConstantExceptionUtil.INVALID_VOLUNTARIO_EMAIL);
-        }
-        if(repository.existsByEmail(voluntario.getEmail())){
-            throw new EmailAlreadyExistsException(voluntario.getEmail());
-        }
+//        if (voluntario.getEmail() == null || !voluntario.getEmail().contains("@")) {
+//            throw new InvalidVoluntarioDataException(ConstantExceptionUtil.INVALID_VOLUNTARIO_EMAIL);
+//        }
+//        if(repository.existsByEmail(voluntario.getEmail())){
+//            throw new EmailAlreadyExistsException(voluntario.getEmail());
+//        }
         return repository.save(voluntario);
     }
 
@@ -46,8 +46,8 @@ public class VoluntarioService {
         Voluntario oldVoluntario = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Voluntário", id));
 
         Optional.ofNullable(voluntario.getNome()).ifPresent(oldVoluntario::setNome);
-        Optional.ofNullable(voluntario.getEmail()).ifPresent(oldVoluntario::setEmail);
-        Optional.ofNullable(voluntario.getSenha()).ifPresent(oldVoluntario::setSenha);
+//        Optional.ofNullable(voluntario.getEmail()).ifPresent(oldVoluntario::setEmail);
+//        Optional.ofNullable(voluntario.getSenha()).ifPresent(oldVoluntario::setSenha);
         Optional.ofNullable(voluntario.getDatasDisponiveis()).ifPresent(dates -> mergeDatasDisponiveis(oldVoluntario, dates));
 
         Optional<List<Escala>> escalasDoVoluntario = escalaRepository.findByVoluntario(oldVoluntario);
