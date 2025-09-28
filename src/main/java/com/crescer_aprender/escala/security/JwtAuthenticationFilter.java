@@ -1,10 +1,10 @@
 package com.crescer_aprender.escala.security;
 
+import com.crescer_aprender.escala.service.UsuarioDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,18 +27,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.usuarioDetailsService = usuarioDetailsService;
     }
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
+
         jwt = authHeader.substring(7);
-        username = jwtService.extractUsername(jwt);
+        try {
+            username = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token incorreto");
+            return;
+        }
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = usuarioDetailsService.loadUserByUsername(username);
             if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -50,4 +60,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
 }

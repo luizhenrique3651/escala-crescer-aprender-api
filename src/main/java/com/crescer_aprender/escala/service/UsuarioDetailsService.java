@@ -1,4 +1,4 @@
-package com.crescer_aprender.escala.security;
+package com.crescer_aprender.escala.service;
 
 import com.crescer_aprender.escala.entity.Usuario;
 import com.crescer_aprender.escala.exception.UsernameNotFoundException;
