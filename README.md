@@ -24,7 +24,7 @@ A API automatiza esse processo de organização, permitindo:
 
 ## 🛠️ Tecnologias e Stacks
 
-- **Java 17**
+- **Java 21**
 - **Spring Boot 3.4.3**
 - **Spring Data JPA**
 - **Flyway** para migrações de banco de dados
