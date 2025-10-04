@@ -1,8 +1,8 @@
 package com.crescer_aprender.escala.service;
 
-import com.crescer_aprender.escala.entity.Escala;
+import com.crescer_aprender.escala.entity.Usuario;
 import com.crescer_aprender.escala.entity.Voluntario;
-import com.crescer_aprender.escala.exception.EmailAlreadyExistsException;
+import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.InvalidVoluntarioDataException;
 import com.crescer_aprender.escala.exception.VoluntarioIsScheduledException;
@@ -41,6 +41,7 @@ public class VoluntarioServiceTest {
                         LocalDate.of(2025, 8, 2),
                         LocalDate.of(2025, 8, 9)
                 )))
+                .usuario(Usuario.builder().email("maria@gmail.com").senha("maria123").role(PerfisUsuariosEnum.VOLUNTARIO).build())
                 .build();
     }
 

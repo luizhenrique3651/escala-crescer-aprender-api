@@ -2,6 +2,7 @@ package com.crescer_aprender.escala.service;
 
 import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.Voluntario;
+import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
 import com.crescer_aprender.escala.exception.*;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
@@ -34,6 +35,9 @@ public class VoluntarioService {
 //        if(repository.existsByEmail(voluntario.getEmail())){
 //            throw new EmailAlreadyExistsException(voluntario.getEmail());
 //        }
+        if(voluntario.getUsuario().getRole() == null){
+            voluntario.getUsuario().setRole(PerfisUsuariosEnum.VOLUNTARIO);
+        }
         return repository.save(voluntario);
     }
 
