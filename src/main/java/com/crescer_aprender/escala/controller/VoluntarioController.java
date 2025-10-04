@@ -9,6 +9,7 @@ import com.crescer_aprender.escala.service.VoluntarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class VoluntarioController {
         this.service = service;
     }
 
+    @PreAuthorize("COORDENADOR")
     @GetMapping
     public ResponseEntity<List<Voluntario>> getAllVoluntarios() {
         return service.loadAll()
@@ -31,6 +33,7 @@ public class VoluntarioController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
+    @PreAuthorize("COORDENADOR")
     @PostMapping
     public ResponseEntity<Voluntario> save(@RequestBody Voluntario voluntario) {
         try {
@@ -51,6 +54,7 @@ public class VoluntarioController {
         }
     }
 
+    @PreAuthorize("COORDENADOR")
     @DeleteMapping("/{id}")
     public ResponseEntity<Voluntario> delete(@PathVariable Long id) {
         try {
