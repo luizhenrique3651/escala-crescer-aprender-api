@@ -115,7 +115,7 @@ class EscalaServiceTest {
     void testSave_ComEscalaExistente_DeveLancarExcecao() {
         Escala escala = criaEscalaExemplo();
 
-        when(escalaRepository.findByAnoAndMes(escala.getAno(), escala.getMes())).thenReturn(Optional.of(escala));
+        when(escalaRepository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes())).thenReturn(Optional.of(escala));
 
         EscalaAlreadyExistsException exception = assertThrows(EscalaAlreadyExistsException.class,
                 () -> escalaService.save(escala));
@@ -135,7 +135,7 @@ class EscalaServiceTest {
         todosVoluntariosDisponiveisNasDuasDatas.addAll(voluntariosDisponiveisData1);
         todosVoluntariosDisponiveisNasDuasDatas.addAll(voluntariosDisponiveisData2);
 
-        when(escalaRepository.findByAnoAndMes(escala.getAno(), escala.getMes())).thenReturn(Optional.empty());
+        when(escalaRepository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes())).thenReturn(Optional.empty());
         when(voluntarioRepository.findVoluntariosByData(LocalDate.of(2025, 7, 5)))
                 .thenReturn(Optional.of(new ArrayList<>(voluntariosDisponiveisData1)));
         when(voluntarioRepository.findVoluntariosByData(LocalDate.of(2025, 7, 12)))

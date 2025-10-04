@@ -38,6 +38,11 @@ public class EscalaService {
         }
     }
 
+    public Optional<Escala> findByAnoAndMes(LocalDate data){
+        Optional<Escala> escala = repository.findByAnoAndMes(data.getYear(), data.getMonthValue());
+        return escala;
+    }
+
     public Optional<Escala> findById(Long id) {
         return repository.findById(id);
     }
@@ -47,7 +52,7 @@ public class EscalaService {
     }
 
     public Escala save(Escala escala) {
-        Optional<Escala> escalaExistente = repository.findByAnoAndMes(escala.getAno(), escala.getMes());
+        Optional<Escala> escalaExistente = repository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes());
         if (escalaExistente.isPresent()) {
             throw new EscalaAlreadyExistsException(escala.getAno(), escala.getMes());
         }
