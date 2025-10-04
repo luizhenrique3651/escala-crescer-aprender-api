@@ -15,12 +15,45 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.12
 tags:
+  - name: Autenticação
+  - description: Operações de Autenticação
   - name: Escala
     description: Operações de Escala
   - name: Voluntario
     description: Entidade Voluntário
 
+
 paths:
+  /auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Realiza login e retorna o token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "admin"
+                password:
+                  type: string
+                  format: password
+                  example: "senha123"
+      responses:
+        '200':
+          description: Token JWT gerado com sucesso
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Credenciais inválidas
+
   /crescer-aprender/escala:
     get:
       tags:
@@ -232,7 +265,13 @@ paths:
         '422':
           description: Voluntário está em uma escala existente
 
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Escala:
       required:
@@ -296,3 +335,6 @@ components:
         errorMessage:
           type: string
           example: 'E-mail já está em uso'
+
+security:
+  - bearerAuth: []
