@@ -1,5 +1,6 @@
 package com.crescer_aprender.escala.entity;
 
+import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,5 +22,5 @@ public class Usuario {
     String senha;
 
     @Column(nullable = false)
-    String role; // Ex: "USER", "ADMIN"
+    PerfisUsuariosEnum role;
 }
