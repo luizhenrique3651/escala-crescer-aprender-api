@@ -17,7 +17,7 @@ public interface EscalaRepository extends JpaRepository<Escala, Long>{
     @Query("SELECT esc FROM Escala esc JOIN esc.voluntarios v WHERE esc.mes = :mes AND esc.ano = :ano AND v.id = :voluntario")
     Optional<Escala> findEscalaByMesAnoVoluntario(@Param("mes") Integer mes, @Param("ano") Long ano, @Param("voluntario") Long voluntario);
 
-    Optional<Escala> findByAnoAndMes(Long ano, Integer mes);
+    Optional<Escala> findByAnoAndMes(Integer ano, Integer mes);
 
     Boolean existsByVoluntarios(Voluntario voluntario);
 

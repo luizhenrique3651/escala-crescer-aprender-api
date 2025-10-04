@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,18 +42,27 @@ public class EscalaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{data}")
+    public ResponseEntity<Escala> getByAnoAndMes(@PathVariable LocalDate data){
+        return escalaService.findByAnoAndMes(data)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("COORDENADOR")
     @PostMapping
     public ResponseEntity<Escala> create(@RequestBody Escala escala) {
         try {
             Escala saved = escalaService.save(escala);
             return ResponseEntity.ok(saved);
         } catch (EscalaAlreadyExistsException e) {
-            return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
         } catch(VoluntarioNotExistException e){
-            return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
     }
 
+    @PreAuthorize("COORDENADOR")
     @PutMapping("/{id}")
     public ResponseEntity<Escala> update(@PathVariable Long id, @RequestBody Escala escala) {
         try {
@@ -62,6 +73,7 @@ public class EscalaController {
         }
     }
 
+    @PreAuthorize("COORDENADOR")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
