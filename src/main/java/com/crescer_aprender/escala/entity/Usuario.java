@@ -22,5 +22,6 @@ public class Usuario {
     String senha;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     PerfisUsuariosEnum role;
 }
