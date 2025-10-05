@@ -1,6 +1,7 @@
 package com.crescer_aprender.escala.controller;
 
 import com.crescer_aprender.escala.security.JwtService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,14 +33,9 @@ public class AuthController {
         }
     }
 
+    @Data
     public static class AuthRequest {
         private String username;
         private String password;
-
-        // getters e setters
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-    }
+}
 }
