@@ -28,8 +28,8 @@ public class AuthController {
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             return jwtService.generateToken(userDetails);
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Credenciais inválidas");
+        } catch (Exception e) {
+            return e.getMessage();
         }
     }
 
