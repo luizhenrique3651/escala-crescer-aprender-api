@@ -37,6 +37,6 @@ public class Escala {
 	)
 	List<Voluntario> voluntarios;
 
-	@Column(name = "MENSAGEM_ERRO")
+	@Transient
 	String errorMessage;
 }

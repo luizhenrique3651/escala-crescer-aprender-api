@@ -30,6 +30,6 @@ public class Voluntario {
 	@Column(name = "DATAS_DISPONIVEIS")
 	List<LocalDate> datasDisponiveis;
 
-	@Column(name = "MENSAGEM_ERRO")
+	@Transient
 	String errorMessage;
 }
