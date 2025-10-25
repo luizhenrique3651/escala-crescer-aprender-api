@@ -233,6 +233,84 @@ paths:
         '404':
           description: Escala não encontrada
 
+  /crescer-aprender/escala/search:
+    get:
+      tags:
+        - Escala
+      summary: "Busca dinâmica por filtros (query params). Ex: ?mes=5&ano=2025&voluntarioId=3"
+      description: >-
+        Busca dinâmica que aceita pares chave=valor via query string. Chaves suportadas: id, mes, ano, data (yyyy-MM-dd), voluntarioId.
+      parameters:
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: mes
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: ano
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: data
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+            example: '2025-05-12'
+        - name: voluntarioId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de escalas que atendem aos filtros
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Escala'
+        '204':
+          description: Nenhuma escala encontrada
+
+    post:
+      tags:
+        - Escala
+      summary: Busca dinâmica por filtros (body JSON)
+      description: >-
+        Envia um objeto JSON com chaves e valores (todos strings) para filtrar. Exemplo: {"mes":"5","ano":"2025"}.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Objeto contendo pares chave=valor para filtros. Valores devem ser strings; datas em formato yyyy-MM-dd.
+              additionalProperties:
+                type: string
+              example:
+                mes: "5"
+                ano: "2025"
+                voluntarioId: "3"
+      responses:
+        '200':
+          description: Lista de escalas que atendem aos filtros
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Escala'
+        '204':
+          description: Nenhuma escala encontrada
+
   /crescer-aprender/voluntarios:
     get:
       tags:
