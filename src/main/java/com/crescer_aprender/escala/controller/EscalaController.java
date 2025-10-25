@@ -1,18 +1,19 @@
 package com.crescer_aprender.escala.controller;
 
 import com.crescer_aprender.escala.entity.Escala;
-import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
 import com.crescer_aprender.escala.exception.VoluntarioNotExistException;
 import com.crescer_aprender.escala.service.EscalaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -98,22 +99,41 @@ public class EscalaController {
     }
 
     /**
-     * Busca dinâmica por query params. Exemplo: /search?mes=5&ano=2025
+     * Busca dinâmica e paginada por query params. Exemplo: /search?mes=5&ano=2025
      * Aceita qualquer par chave=valor; chaves suportadas por EscalaSpecifications: id, mes, ano, data(s), voluntario(voluntarioId).
      */
-    @GetMapping("/search")
-    public ResponseEntity<List<Escala>> searchByQueryParams(@RequestParam Map<String, String> params) {
-        Optional<List<Escala>> results = escalaService.findByFilters(params);
+    @GetMapping("/pesquisa")
+    public ResponseEntity<Page<Escala>> searchByQueryParams(@RequestParam Map<String, String> params, @PageableDefault Pageable pageable) {
+        Page<Escala> results = escalaService.findByFiltersPaginated(params, pageable);
+        if (results == null || results.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(results);
+    }
+
+    /**
+     * Busca dinâmica e paginada     por body JSON. Exemplo POST /search with body {"mes":"5","ano":"2025"}
+     */
+    @PostMapping("/pesquisa")
+    public ResponseEntity<Page<Escala>> searchByBody(@RequestBody Map<String, String> filters, @PageableDefault Pageable pageable) {
+        Page<Escala> results = escalaService.findByFiltersPaginated(filters, pageable);
+        if (results == null || results.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(results);
+    }
+
+    // endpoints não paginados
+    @GetMapping("/pesquisa-legado")
+    public ResponseEntity<List<Escala>> searchByQueryParamsList(@RequestParam Map<String, String> params) {
+        Optional<List<Escala>> results = escalaService.findByFiltersWithoutPagination(params);
         return results.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
-    /**
-     * Busca dinâmica por body JSON. Exemplo POST /search with body {"mes":"5","ano":"2025"}
-     */
-    @PostMapping("/search")
-    public ResponseEntity<List<Escala>> searchByBody(@RequestBody Map<String, String> filters) {
-        Optional<List<Escala>> results = escalaService.findByFilters(filters);
+    @PostMapping("/pesquisa-legado")
+    public ResponseEntity<List<Escala>> searchByBodyList(@RequestBody Map<String, String> filters) {
+        Optional<List<Escala>> results = escalaService.findByFiltersWithoutPagination(filters);
         return results.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }

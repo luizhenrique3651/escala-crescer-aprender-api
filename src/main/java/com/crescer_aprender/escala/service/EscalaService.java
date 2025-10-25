@@ -9,9 +9,10 @@ import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.EscalaSpecifications;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,10 @@ public class EscalaService {
     public EscalaService(EscalaRepository repository, VoluntarioRepository voluntarioRepository) {
         this.repository = repository;
         this.voluntarioRepository = voluntarioRepository;
+    }
+
+    public Page<Escala> findByFiltersPaginated(Map<String, String> filters, Pageable pageable) {
+        return repository.findAll(EscalaSpecifications.byFilters(filters), pageable);
     }
 
     public Optional<Escala> findEscalaByMesAnoVoluntario(Integer mes, Long ano, Long voluntario) {
@@ -133,7 +138,8 @@ public class EscalaService {
                 .forEach(datasAtuais::add);
     }
 
-    public Optional<List<Escala>> findByFilters(Map<String, String> filters) {
+    // manter compatibilidade, mas preferível o método paginado
+    public Optional<List<Escala>> findByFiltersWithoutPagination(Map<String, String> filters) {
         List<Escala> results = repository.findAll(EscalaSpecifications.byFilters(filters));
         return Optional.ofNullable(results == null || results.isEmpty() ? null : results);
     }

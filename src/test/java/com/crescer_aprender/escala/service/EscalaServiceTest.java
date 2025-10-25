@@ -14,7 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import javax.swing.text.html.Option;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+
 import java.time.LocalDate;
 import java.util.*;
 
@@ -200,5 +205,35 @@ class EscalaServiceTest {
         assertTrue(exception.getMessage().contains("não encontrado"));
         verify(escalaRepository, never()).deleteById(anyLong());
     }
-}
 
+    @Test
+    void testFindByFilters_NonPaged_ReturnsList() {
+        Escala escala = criaEscalaExemplo();
+        Map<String, String> filters = Map.of("mes", String.valueOf(escala.getMes()));
+        List<Escala> expected = List.of(escala);
+
+        when(escalaRepository.findAll(Mockito.<Specification<Escala>>any())).thenReturn(expected);
+
+        Optional<List<Escala>> resultado = escalaService.findByFiltersWithoutPagination(filters);
+        assertTrue(resultado.isPresent());
+        assertEquals(1, resultado.get().size());
+        assertEquals(escala, resultado.get().get(0));
+    }
+
+    @Test
+    void testFindByFilters_Paginated_ReturnsPage() {
+        Escala escala = criaEscalaExemplo();
+        Map<String, String> filters = Map.of("mes", String.valueOf(escala.getMes()));
+        List<Escala> content = List.of(escala);
+        Page<Escala> page = new PageImpl<>(content, PageRequest.of(0, 10), 1);
+
+        when(escalaRepository.findAll(Mockito.<Specification<Escala>>any(), any(Pageable.class)))
+                .thenReturn(page);
+
+        Page<Escala> resultado = escalaService.findByFiltersPaginated(filters, PageRequest.of(0, 10));
+        assertNotNull(resultado);
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(1, resultado.getContent().size());
+        assertEquals(escala, resultado.getContent().get(0));
+    }
+}
