@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+    <style>
+        .box { fill: #ffffff; stroke: #2b6cb0; stroke-width: 2; rx: 8px; }
+        .box-muted { fill: #f7fafc; stroke: #a0aec0; stroke-width: 1; rx: 8px; }
+        .title { font: bold 22px sans-serif; fill: #2d3748; }
+        .label { font: 16px sans-serif; fill: #2d3748; }
+        .small { font: 14px sans-serif; fill: #4a5568; }
+        .arrow { stroke: #2d3748; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#2d3748" />
+        </marker>
+    </defs>
+
+    <!-- Camada Cliente e Início -->
+    <rect x="60" y="60" width="960" height="120" class="box"/>
+    <text x="120" y="110" class="title">Cliente</text>
+    <text x="120" y="140" class="small">Browser / Mobile / Postman</text>
+
+    <rect x="60" y="200" width="960" height="120" class="box"/>
+    <text x="120" y="250" class="title">Swagger UI</text>
+    <text x="120" y="280" class="small">/ static/swagger.yaml</text>
+
+    <rect x="60" y="340" width="960" height="120" class="box"/>
+    <text x="120" y="390" class="title">Gateway API</text>
+    <text x="120" y="420" class="small">(Nginx opcional ou direto)</text>
+
+    <!-- Camada de Aplicação / Núcleo -->
+    <rect x="40" y="500" width="1000" height="860" class="box-muted"/>
+    <text x="60" y="540" class="title">Escala API (Spring Boot)</text>
+
+    <!-- Controller -->
+    <rect x="200" y="580" width="680" height="140" class="box"/>
+    <text x="260" y="630" class="title">Controller</text>
+    <text x="260" y="670" class="small">Endpoints REST e mapeamento</text>
+
+    <!-- Service -->
+    <rect x="200" y="740" width="680" height="140" class="box"/>
+    <text x="260" y="790" class="title">Serviço</text>
+    <text x="260" y="830" class="small">Lógica de negócio, regras, transações</text>
+
+    <!-- Specifications -->
+    <rect x="200" y="900" width="680" height="140" class="box"/>
+    <text x="260" y="950" class="title">EscalaSpecifications</text>
+    <text x="260" y="990" class="small">Filtragem dinâmica via Criteria API</text>
+
+    <!-- Segurança -->
+    <rect x="200" y="1060" width="680" height="140" class="box"/>
+    <text x="260" y="1110" class="title">Segurança</text>
+    <text x="260" y="1150" class="small">Spring Security + JWT</text>
+
+    <!-- Repositório -->
+    <rect x="200" y="1220" width="680" height="140" class="box"/>
+    <text x="260" y="1270" class="title">Repositório</text>
+    <text x="260" y="1310" class="small">JpaRepository + JpaSpecificationExecutor</text>
+
+    <!-- Banco de Dados -->
+    <rect x="200" y="1380" width="680" height="140" class="box"/>
+    <text x="260" y="1430" class="title">PostgreSQL</text>
+    <text x="260" y="1470" class="small">Migrações com Flyway</text>
+
+    <!-- Qualidade & CI -->
+    <rect x="60" y="1560" width="450" height="220" class="box-muted"/>
+    <text x="100" y="1600" class="title">Qualidade e CI</text>
+    <text x="100" y="1640" class="small">JUnit + Mockito (testes unitários)</text>
+    <text x="100" y="1680" class="small">(Teste de integração: Testcontainers)</text>
+    <text x="100" y="1720" class="small">CI: build, testes, análise estática, cobertura</text>
+
+    <!-- Infraestrutura / Docker -->
+    <rect x="570" y="1560" width="450" height="220" class="box-muted"/>
+    <text x="610" y="1600" class="title">Infraestrutura</text>
+    <text x="610" y="1640" class="small">Docker + docker-compose</text>
+    <text x="610" y="1680" class="small">Containers da API e do banco</text>
+
+    <!-- Setas verticais entre blocos principais -->
+    <path class="arrow" d="M540 180 L540 500" />    <!-- Cliente → Controller -->
+    <path class="arrow" d="M540 320 L540 340" />    <!-- Swagger → Gateway -->
+    <path class="arrow" d="M540 460 L540 500" />    <!-- Gateway → Controller -->
+
+    <path class="arrow" d="M540 720 L540 740" />    <!-- Controller → Serviço -->
+    <path class="arrow" d="M540 880 L540 900" />    <!-- Serviço → Specifications -->
+    <path class="arrow" d="M540 1040 L540 1060" />  <!-- Specifications → Segurança -->
+    <path class="arrow" d="M540 1200 L540 1220" />  <!-- Segurança → Repositório -->
+    <path class="arrow" d="M540 1360 L540 1380" />  <!-- Repositório → Banco de dados -->
+
+    <path class="arrow" d="M260 1540 L260 1380" />  <!-- Qualidade & CI → Repositório / app -->
+    <path class="arrow" d="M750 1540 L750 1380" />  <!-- Infraestrutura → app -->
+
+    <!-- Legenda -->
+    <rect x="60" y="1820" width="960" height="120" class="box-muted"/>
+    <text x="100" y="1860" class="title">Legenda</text>
+    <text x="100" y="1900" class="small">Controller → Endpoints REST</text>
+    <text x="360" y="1900" class="small">Serviço → Regras de negócio</text>
+    <text x="660" y="1900" class="small">Specifications → Filtros dinâmicos</text>
+</svg>
