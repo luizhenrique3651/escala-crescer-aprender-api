@@ -35,21 +35,21 @@ public class EscalaController {
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("byId/{id}")
     public ResponseEntity<Escala> getById(@PathVariable Long id) {
         return escalaService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{data}")
+    @GetMapping("byDate/{data}")
     public ResponseEntity<Escala> getByAnoAndMes(@PathVariable LocalDate data){
         return escalaService.findByAnoAndMes(data)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("COORDENADOR")
+    @PreAuthorize("hasAuthority('COORDENADOR')")
     @PostMapping
     public ResponseEntity<Escala> create(@RequestBody Escala escala) {
         try {
@@ -62,7 +62,7 @@ public class EscalaController {
         }
     }
 
-    @PreAuthorize("COORDENADOR")
+    @PreAuthorize("hasAuthority('COORDENADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<Escala> update(@PathVariable Long id, @RequestBody Escala escala) {
         try {
@@ -73,7 +73,7 @@ public class EscalaController {
         }
     }
 
-    @PreAuthorize("COORDENADOR")
+    @PreAuthorize("hasAuthority('COORDENADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
