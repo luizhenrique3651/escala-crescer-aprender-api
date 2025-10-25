@@ -25,7 +25,7 @@ public class VoluntarioController {
         this.service = service;
     }
 
-    @PreAuthorize("COORDENADOR")
+    @PreAuthorize("hasAuthority('COORDENADOR')")
     @GetMapping
     public ResponseEntity<List<Voluntario>> getAllVoluntarios() {
         return service.loadAll()
@@ -33,7 +33,7 @@ public class VoluntarioController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    @PreAuthorize("COORDENADOR")
+    @PreAuthorize("hasAuthority('COORDENADOR')")
     @PostMapping
     public ResponseEntity<Voluntario> save(@RequestBody Voluntario voluntario) {
         try {
@@ -54,7 +54,7 @@ public class VoluntarioController {
         }
     }
 
-    @PreAuthorize("COORDENADOR")
+    @PreAuthorize("hasAuthority('COORDENADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Voluntario> delete(@PathVariable Long id) {
         try {
