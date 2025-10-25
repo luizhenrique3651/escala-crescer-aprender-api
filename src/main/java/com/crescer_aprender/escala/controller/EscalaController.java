@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -94,5 +95,26 @@ public class EscalaController {
         }catch (EntityNotFoundException e) {
             return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    /**
+     * Busca dinâmica por query params. Exemplo: /search?mes=5&ano=2025
+     * Aceita qualquer par chave=valor; chaves suportadas por EscalaSpecifications: id, mes, ano, data(s), voluntario(voluntarioId).
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<Escala>> searchByQueryParams(@RequestParam Map<String, String> params) {
+        Optional<List<Escala>> results = escalaService.findByFilters(params);
+        return results.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    /**
+     * Busca dinâmica por body JSON. Exemplo POST /search with body {"mes":"5","ano":"2025"}
+     */
+    @PostMapping("/search")
+    public ResponseEntity<List<Escala>> searchByBody(@RequestBody Map<String, String> filters) {
+        Optional<List<Escala>> results = escalaService.findByFilters(filters);
+        return results.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 }

@@ -6,6 +6,7 @@ import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
 import com.crescer_aprender.escala.exception.VoluntarioNotExistException;
 import com.crescer_aprender.escala.repository.EscalaRepository;
+import com.crescer_aprender.escala.repository.EscalaSpecifications;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -131,5 +133,9 @@ public class EscalaService {
                 .forEach(datasAtuais::add);
     }
 
+    public Optional<List<Escala>> findByFilters(Map<String, String> filters) {
+        List<Escala> results = repository.findAll(EscalaSpecifications.byFilters(filters));
+        return Optional.ofNullable(results == null || results.isEmpty() ? null : results);
+    }
 
 }
