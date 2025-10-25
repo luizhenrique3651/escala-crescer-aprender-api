@@ -75,6 +75,8 @@ paths:
       tags:
         - Escala
       summary: Cadastra uma nova Escala
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -90,8 +92,14 @@ paths:
                 $ref: '#/components/schemas/Escala'
         '400':
           description: Requisição inválida
+        '403':
+          description: Acesso negado — usuário autenticado sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /crescer-aprender/escala/{id}:
+  /crescer-aprender/escala/byId/{id}:
     get:
       tags:
         - Escala
@@ -112,10 +120,36 @@ paths:
         '404':
           description: Escala não encontrada
 
+  /crescer-aprender/escala/byDate/{data}:
+    get:
+      tags:
+        - Escala
+      summary: Busca Escala por data (LocalDate) — formato yyyy-MM-dd
+      parameters:
+        - name: data
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Escala encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escala'
+        '404':
+          description: Escala não encontrada
+
+  /crescer-aprender/escala/{id}:
+
     put:
       tags:
         - Escala
       summary: Atualiza uma Escala existente
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -137,11 +171,19 @@ paths:
                 $ref: '#/components/schemas/Escala'
         '404':
           description: Escala não encontrada
+        '403':
+          description: Acesso negado — usuário autenticado sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
       tags:
         - Escala
       summary: Remove uma Escala
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -153,6 +195,12 @@ paths:
           description: Escala removida
         '404':
           description: Escala não encontrada
+        '403':
+          description: Acesso negado — usuário autenticado sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /crescer-aprender/escala/buscar-por-mes-ano-voluntario:
     get:
@@ -201,11 +249,19 @@ paths:
                   $ref: '#/components/schemas/Voluntario'
         '204':
           description: Nenhum voluntário encontrado
+        '403':
+          description: Acesso negado — usuário autenticado sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     post:
       tags:
         - Voluntario
       summary: Cadastra um novo voluntário
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -221,6 +277,12 @@ paths:
                 $ref: '#/components/schemas/Voluntario'
         '400':
           description: E-mail já existente
+        '403':
+          description: Acesso negado — usuário autenticado sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /crescer-aprender/voluntarios/{id}:
     put:
@@ -253,6 +315,8 @@ paths:
       tags:
         - Voluntario
       summary: Remove um voluntário
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -264,7 +328,12 @@ paths:
           description: Voluntário removido com sucesso
         '422':
           description: Voluntário está em uma escala existente
-
+        '403':
+          description: Acesso negado — usuário autenticado sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -307,10 +376,30 @@ components:
           type: string
           example: 'Erro ao salvar escala'
 
+    Usuario:
+      required:
+        - email
+        - senha
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: joao@email.com
+        senha:
+          type: string
+          format: password
+          example: senhaSegura123
+        role:
+          type: string
+          example: COORDENADOR
+
     Voluntario:
       required:
         - nome
-        - email
+        - usuario
       type: object
       properties:
         id:
@@ -319,13 +408,8 @@ components:
         nome:
           type: string
           example: João da Silva
-        email:
-          type: string
-          example: joao@email.com
-        senha:
-          type: string
-          format: password
-          example: senhaSegura123
+        usuario:
+          $ref: '#/components/schemas/Usuario'
         datasDisponiveis:
           type: array
           items:
@@ -335,6 +419,21 @@ components:
         errorMessage:
           type: string
           example: 'E-mail já está em uso'
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
 
 security:
   - bearerAuth: []
