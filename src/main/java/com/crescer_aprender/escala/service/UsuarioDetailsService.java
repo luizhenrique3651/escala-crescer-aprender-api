@@ -23,6 +23,7 @@ public class UsuarioDetailsService implements UserDetailsService {
                 .withUsername(usuario.getEmail())
                 .password(usuario.getSenha())
                 .roles(usuario.getRole().name())
+                .authorities(usuario.getRole().name())
                 .build();
     }
 }
