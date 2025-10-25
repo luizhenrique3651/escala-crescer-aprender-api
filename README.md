@@ -1,4 +1,3 @@
-
 # Escala API
 
 **Escala API** é uma API REST desenvolvida em Java com Spring Boot para facilitar o cadastro e o controle de escalas de voluntários do projeto social **Crescer e Aprender**. Esse projeto tem como missão oferecer aulas gratuitas de **Informática**, **Matemática** e **Língua Portuguesa** para crianças em situação de vulnerabilidade social.
@@ -45,33 +44,94 @@ A API automatiza esse processo de organização, permitindo:
 - [x] **Visualização da escala por data**
 - [x] **Visualização da escala por voluntário**
 - [x] **Edição manual da escala**
-- [ ] Autenticação e autorização para administradores (em desenvolvimento)
+- [x] **Autenticação e autorização para administradores/coordenação**
+
+> Observação: A funcionalidade de autenticação/autorizações foi implementada via JWT. Endpoints protegidos exigem o cabeçalho `Authorization: Bearer <token>` e controles de acesso por role (por exemplo, `COORDENADOR`).
 
 ---
 
 ## ▶️ Como Rodar o projeto
 Na pasta raiz do projeto, execute:
-```bash 
+```bash
 docker compose up --build
 ```
+ou, localmente sem Docker:
+```bash
+./mvnw -DskipTests package
+java -jar target/escala-0.0.1-SNAPSHOT.jar
+```
+
+---
+
 ## 📚 Endpoints da API
 
-### 🔹 Voluntários
+### 🔹 Autenticação
+- `POST /auth/login` — Faz login e retorna um token JWT (string no corpo). Exemplo de request body:
+```json
+{ "username": "email@exemplo.com", "password": "senha" }
+```
+Resposta: token JWT em texto puro (200) ou 401 em caso de credenciais inválidas.
 
-- `GET /crescer-aprender/voluntarios`: Lista todos os voluntários
-- `GET /crescer-aprender/voluntarios/{id}`: Retorna voluntário por ID
-- `POST /crescer-aprender/voluntarios`: Cria um novo voluntário
-- `PUT /crescer-aprender/voluntarios/{id}`: Atualiza um voluntário
-- `DELETE /crescer-aprender/voluntarios/{id}`: Remove um voluntário (não pode estar escalado)
+### 🔹 Voluntários
+- `GET /crescer-aprender/voluntarios` — Lista todos os voluntários
+- `GET /crescer-aprender/voluntarios/{id}` — Retorna voluntário por ID
+- `POST /crescer-aprender/voluntarios` — Cria um novo voluntário (requer role `COORDENADOR`)
+- `PUT /crescer-aprender/voluntarios/{id}` — Atualiza um voluntário
+- `DELETE /crescer-aprender/voluntarios/{id}` — Remove um voluntário (não pode estar escalado; requer `COORDENADOR`)
 
 ### 🔹 Escalas
+- `GET /crescer-aprender/escala` — Lista todas as escalas
+- `GET /crescer-aprender/escala/byId/{id}` — Retorna a escala por ID
+- `GET /crescer-aprender/escala/byDate/{data}` — Busca escala por data (formato: `yyyy-MM-dd`)
+- `GET /crescer-aprender/escala/buscar-por-mes-ano-voluntario?mes={mes}&ano={ano}&idVoluntario={id}` — Busca escala por mês, ano e voluntário
+- `POST /crescer-aprender/escala` — Gera uma nova escala (requer `COORDENADOR`)
+- `PUT /crescer-aprender/escala/{id}` — Edita uma escala existente (requer `COORDENADOR`)
+- `DELETE /crescer-aprender/escala/{id}` — Deleta uma escala por ID (requer `COORDENADOR`)
 
-- `GET /crescer-aprender/escala`: Lista todas as escalas
-- `GET /crescer-aprender/escala/{id}`: Retorna a escala por ID
-- `GET /crescer-aprender/escala/buscar-por-mes-ano-voluntario?mes={mes}&ano={ano}&idVoluntario={id}`: Busca escala por mês, ano e voluntário
-- `POST /crescer-aprender/escala`: Gera uma nova escala
-- `PUT /crescer-aprender/escala/{id}`: Edita uma escala existente
-- `DELETE /crescer-aprender/escala/{id}`: Deleta uma escala por ID
+---
+
+## 🛡️ Segurança e uso do Swagger
+
+A documentação interativa do Swagger está disponível em:
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+No Swagger UI use o botão **Authorize** e cole o token no formato:
+```
+Bearer <TOKEN>
+```
+Depois de autorizado, as operações protegidas aceitarão o cabeçalho automaticamente.
+
+---
+
+## ⚠️ Tratamento de Erros
+
+A aplicação utiliza exceções customizadas para fornecer mensagens claras e específicas. Além disso, respostas de segurança (401/403) são padronizadas em JSON com o schema `ErrorResponse`.
+
+Exceções customizadas existentes (respostas e quando são lançadas):
+
+- `EntityNotFoundException` – quando uma entidade não é localizada.
+- `EmailAlreadyExistsException` – e-mail de voluntário já está em uso.
+- `VoluntarioIsScheduledException` – impede exclusão de voluntário escalado.
+- `EscalaAlreadyExistsException` – evita duplicidade de escalas por mês/ano.
+- `InvalidVoluntarioDataException` – dados inválidos no cadastro.
+- `DatabaseException` – falha ao acessar o banco de dados.
+
+Erros de autenticação/autorização (padronizados):
+- 401 Unauthorized — quando o token está ausente ou inválido (handled by `CustomAuthenticationEntryPoint`).
+- 403 Forbidden — quando o usuário está autenticado, mas não tem permissão para o recurso (handled by `CustomAccessDeniedHandler`).
+
+Exemplo de `ErrorResponse` (JSON):
+```json
+{
+  "timestamp": "2025-10-25T06:46:38.123Z",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Você não tem permissão para acessar este recurso",
+  "path": "/crescer-aprender/voluntarios"
+}
+```
 
 ---
 
@@ -87,20 +147,7 @@ Por essa interface você pode:
 
 - Consultar todos os endpoints disponíveis
 - Visualizar exemplos de requisições e respostas
-- Testar chamadas diretamente pelo navegador
-
----
-
-## ⚠️ Tratamento de Erros
-
-A aplicação utiliza exceções customizadas para fornecer mensagens claras e específicas:
-
-- `EntityNotFoundException` – quando uma entidade não é localizada.
-- `EmailAlreadyExistsException` – e-mail de voluntário já está em uso.
-- `VoluntarioIsScheduledException` – impede exclusão de voluntário escalado.
-- `EscalaAlreadyExistsException` – evita duplicidade de escalas por mês/ano.
-- `InvalidVoluntarioDataException` – dados inválidos no cadastro.
-- `DatabaseException` – falha ao acessar o banco de dados.
+- Testar chamadas diretamente pelo navegador (lembre-se de autorizar com o token JWT)
 
 ---
 
@@ -122,8 +169,8 @@ Este projeto é **open source** e colaborações são muito bem-vindas! Para con
 
 ## 📝 Possíveis Melhorias Futuras
 
-- Implementar autenticação via Spring Security (admin/coordenadores)
 - Adicionar filtros de busca por nome e e-mail de voluntário
+- Criar testes de integração que validem fluxos de autenticação e autorização
 
 ---
 
@@ -132,5 +179,3 @@ Este projeto é **open source** e colaborações são muito bem-vindas! Para con
 - Desenvolvedor: Luiz Henrique
 - GitHub: [luizhenrique3651/escala-crescer-aprender-api](https://github.com/luizhenrique3651/escala-crescer-aprender-api)
 - Instagram do projeto: [proj_crescereaprender](https://www.instagram.com/proj_crescereaprender/)
-
----
