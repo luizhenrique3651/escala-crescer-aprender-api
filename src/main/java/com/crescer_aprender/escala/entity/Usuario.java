@@ -24,4 +24,7 @@ public class Usuario {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     PerfisUsuariosEnum role;
+
+    @Transient
+    String errorMessage;
 }

@@ -5,9 +5,13 @@ import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
 import com.crescer_aprender.escala.exception.*;
 import com.crescer_aprender.escala.repository.EscalaRepository;
+import com.crescer_aprender.escala.repository.UsuarioRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,26 +22,46 @@ public class VoluntarioService {
 
     private final VoluntarioRepository repository;
     private final EscalaRepository escalaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public VoluntarioService(VoluntarioRepository repository, EscalaRepository escalaRepository) {
+    public VoluntarioService(VoluntarioRepository repository, EscalaRepository escalaRepository, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.escalaRepository = escalaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public Voluntario save(Voluntario voluntario) {
         if (voluntario.getNome() == null || voluntario.getNome().isEmpty()) {
             throw new InvalidVoluntarioDataException(ConstantExceptionUtil.INVALID_VOLUNTARIO_NAME);
         }
-//        if (voluntario.getEmail() == null || !voluntario.getEmail().contains("@")) {
-//            throw new InvalidVoluntarioDataException(ConstantExceptionUtil.INVALID_VOLUNTARIO_EMAIL);
-//        }
-//        if(repository.existsByEmail(voluntario.getEmail())){
-//            throw new EmailAlreadyExistsException(voluntario.getEmail());
-//        }
-        if(voluntario.getUsuario().getRole() == null){
-            voluntario.getUsuario().setRole(PerfisUsuariosEnum.VOLUNTARIO);
+
+        // Se houver um Usuário aninhado, valide e persista primeiro
+        if (voluntario.getUsuario() != null) {
+            if (voluntario.getUsuario().getEmail() == null || !voluntario.getUsuario().getEmail().contains("@")) {
+                throw new InvalidVoluntarioDataException(ConstantExceptionUtil.INVALID_VOLUNTARIO_EMAIL);
+            }
+            if (usuarioRepository.findByEmail(voluntario.getUsuario().getEmail()).isPresent()) {
+                throw new EmailAlreadyExistsException(voluntario.getUsuario().getEmail());
+            }
+            if (voluntario.getUsuario().getRole() == null) {
+                voluntario.getUsuario().setRole(PerfisUsuariosEnum.VOLUNTARIO);
+            }
+            if (voluntario.getUsuario().getSenha() != null) {
+                voluntario.getUsuario().setSenha(passwordEncoder.encode(voluntario.getUsuario().getSenha()));
+            }
+            // salve o usuário primeiro para garantir que ele tenha um id (nenhuma cascata configurada)
+            try {
+                usuarioRepository.save(voluntario.getUsuario());
+            } catch (DataIntegrityViolationException dive) {
+                // Em caso de condição de corrida ou violação de restrição de banco de dados, traduzir para exceção de domínio
+                throw new EmailAlreadyExistsException(voluntario.getUsuario().getEmail());
+            }
         }
+
         return repository.save(voluntario);
     }
 

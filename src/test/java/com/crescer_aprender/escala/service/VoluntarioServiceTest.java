@@ -3,14 +3,14 @@ package com.crescer_aprender.escala.service;
 import com.crescer_aprender.escala.entity.Usuario;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
-import com.crescer_aprender.escala.exception.EntityNotFoundException;
-import com.crescer_aprender.escala.exception.InvalidVoluntarioDataException;
-import com.crescer_aprender.escala.exception.VoluntarioIsScheduledException;
+import com.crescer_aprender.escala.exception.*;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
+import com.crescer_aprender.escala.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -24,6 +24,12 @@ public class VoluntarioServiceTest {
 
     @Mock
     private EscalaRepository escalaRepository;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private VoluntarioService voluntarioService;
@@ -47,13 +53,33 @@ public class VoluntarioServiceTest {
 
     @Test
     void save_Sucesso() {
-        when(voluntarioRepository.save(any())).thenReturn(voluntario);
+        // Preparar mocks para salvar usuario e voluntario
+        when(usuarioRepository.findByEmail("maria@gmail.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("maria123")).thenReturn("encoded-senha");
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> {
+            Usuario u = inv.getArgument(0);
+            u.setId(2L);
+            return u;
+        });
+        when(voluntarioRepository.save(any(Voluntario.class))).thenAnswer(inv -> {
+            Voluntario v = inv.getArgument(0);
+            v.setId(1L);
+            return v;
+        });
 
         Voluntario saved = voluntarioService.save(voluntario);
 
         assertNotNull(saved);
         assertEquals("Maria", saved.getNome());
-        verify(voluntarioRepository).save(voluntario);
+        assertNotNull(saved.getUsuario());
+        assertEquals(2L, saved.getUsuario().getId());
+        // senha deve ter sido codificada
+        assertEquals("encoded-senha", saved.getUsuario().getSenha());
+
+        verify(usuarioRepository).findByEmail("maria@gmail.com");
+        verify(passwordEncoder).encode("maria123");
+        verify(usuarioRepository).save(any(Usuario.class));
+        verify(voluntarioRepository).save(any(Voluntario.class));
     }
 
     @Test
@@ -67,27 +93,19 @@ public class VoluntarioServiceTest {
         assertEquals("O nome do voluntário é obrigatório.", e.getMessage());
     }
 
-//    @Test
-//    void save_FalhaEmailInvalido() {
-//        voluntario.setEmail("invalidemail");
-//
-//        InvalidVoluntarioDataException e = assertThrows(InvalidVoluntarioDataException.class, () -> {
-//            voluntarioService.save(voluntario);
-//        });
-//
-//        assertEquals("O e-mail do voluntário é inválido.", e.getMessage());
-//    }
+    @Test
+    void save_FalhaEmailJaExiste() {
+        when(usuarioRepository.findByEmail("maria@gmail.com")).thenReturn(Optional.of(Usuario.builder().id(5L).email("maria@gmail.com").build()));
 
-//    @Test
-//    void save_FalhaEmailJaExiste() {
-//        when(voluntarioRepository.existsByEmail(voluntario.getEmail())).thenReturn(true);
-//
-//        EmailAlreadyExistsException e = assertThrows(EmailAlreadyExistsException.class, () -> {
-//            voluntarioService.save(voluntario);
-//        });
-//
-//        assertEquals("O e-mail maria@email.com já está em uso.", e.getMessage());
-//    }
+        EmailAlreadyExistsException e = assertThrows(EmailAlreadyExistsException.class, () -> {
+            voluntarioService.save(voluntario);
+        });
+
+        assertTrue(e.getMessage().contains("já está em uso"));
+        verify(usuarioRepository).findByEmail("maria@gmail.com");
+        verify(usuarioRepository, never()).save(any());
+        verify(voluntarioRepository, never()).save(any());
+    }
 
     @Test
     void loadAll_RetornaLista() {
