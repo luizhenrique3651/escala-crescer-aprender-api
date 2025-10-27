@@ -233,41 +233,15 @@ paths:
         '404':
           description: Escala não encontrada
 
-  /crescer-aprender/escala/search:
+  /crescer-aprender/escala/pesquisa:
     get:
       tags:
         - Escala
-      summary: "Busca dinâmica por filtros (query params). Ex: ?mes=5&ano=2025&voluntarioId=3"
+      summary: Busca dinâmica por filtros e paginada (query params)
       description: >-
-        Busca dinâmica que aceita pares chave=valor via query string. Chaves suportadas: id, mes, ano, data (yyyy-MM-dd), voluntarioId.
+        Aceita pares chave=valor via query string. Como o endpoint usa um Map<String,String> para filtros, os parâmetros de filtro não são listados individualmente aqui — exemplos de chaves suportadas: `id`, `mes`, `ano`, `datas` (datas em formato yyyy-MM-dd, pode ser representado como lista/valores separados), `voluntario` (id do voluntário).
+        Paginação segue o padrão Spring `Pageable`: `page` (0-based), `size` e `sort` (ex: `data,asc`).
       parameters:
-        - name: id
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: mes
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: ano
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: data
-          in: query
-          required: false
-          schema:
-            type: string
-            format: date
-            example: '2025-05-12'
-        - name: voluntarioId
-          in: query
-          required: false
-          schema:
-            type: integer
         - name: page
           in: query
           required: false
@@ -288,7 +262,7 @@ paths:
           description: "Ordenação (ex: propriedade,asc ou propriedade,desc). Pode ser múltiplo."
           schema:
             type: string
-            example: mes,asc
+
       responses:
         '200':
           description: Página de escalas que atendem aos filtros
@@ -302,9 +276,10 @@ paths:
     post:
       tags:
         - Escala
-      summary: Busca dinâmica por filtros (body JSON)
+      summary: Busca dinâmica por filtros (body JSON) e paginada
       description: >-
-        Envia um objeto JSON com chaves e valores (todos strings) para filtrar. Exemplo: {"mes":"5","ano":"2025"}.
+        Recebe um objeto JSON com chaves e valores (todos strings) para filtrar. Exemplo: {"mes":"5","ano":"2025","voluntario":"3"}.
+        Paginação segue o padrão Spring `Pageable`: use os query params `page`, `size` e `sort`.
       requestBody:
         required: true
         content:
@@ -317,7 +292,7 @@ paths:
               example:
                 mes: "5"
                 ano: "2025"
-                voluntarioId: "3"
+                voluntario: "3"
       parameters:
         - name: page
           in: query
@@ -339,7 +314,6 @@ paths:
           description: "Ordenação (ex: propriedade,asc ou propriedade,desc). Pode ser múltiplo."
           schema:
             type: string
-            example: mes,asc
       responses:
         '200':
           description: Página de escalas que atendem aos filtros
@@ -350,7 +324,7 @@ paths:
         '204':
           description: Nenhuma escala encontrada
 
-  /crescer-aprender/escala/search/list:
+  /crescer-aprender/escala/pesquisa-legado:
     get:
       tags:
         - Escala

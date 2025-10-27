@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Helper to build dynamic Specifications for Escala.
- * Supported filter keys: id, mes, ano, data (or datas) as ISO date (yyyy-MM-dd), voluntario or voluntarioId
+ * Classe Auxiliar para criar especificações dinâmicas para o Escala.
+ * Chaves de filtro suportadas: id, mes, ano, data (ou datas) como data ISO (aaaa-MM-dd), voluntario ou voluntarioId
  */
 public class EscalaSpecifications {
 
@@ -46,7 +46,7 @@ public class EscalaSpecifications {
                     case "datas":
                         try {
                             LocalDate date = LocalDate.parse(value);
-                            // join element collection 'datas' and compare
+                            // join de datas para coleção de datas
                             jakarta.persistence.criteria.Join<?, ?> join = root.join("datas");
                             predicates.add(builder.equal(join, date));
                         } catch (Exception ignored) {
@@ -61,10 +61,11 @@ public class EscalaSpecifications {
                         }
                         break;
                     default:
-                        // fallback: try to compare attribute as string
+                        // fallback: tenta comparar as chaves com string
                         try {
                             predicates.add(builder.equal(root.get(key).as(String.class), value));
                         } catch (Exception ignored) {
+                            //ignora em caso de erro
                         }
                 }
             });
