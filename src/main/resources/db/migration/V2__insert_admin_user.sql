@@ -4,7 +4,7 @@
 INSERT INTO usuario (email, senha, role)
 VALUES (
   'admin@email.com',
-  '$2a$10$Abnv7Sc5MB242IgHxdsGnuTldUdo5T0B4G9Jny9jvYAtdrnkElFKC',
+  '$2a$10$Y7GnkISD445n0aNG.b8QquKz8LwLFGCOCQCqffyuFZW7N.VxwVpAK',
   'COORDENADOR'
 )
 ON CONFLICT (email) DO NOTHING;

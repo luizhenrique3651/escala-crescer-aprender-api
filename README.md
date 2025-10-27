@@ -149,6 +149,13 @@ Por essa interface você pode:
 - Visualizar exemplos de requisições e respostas
 - Testar chamadas diretamente pelo navegador (lembre-se de autorizar com o token JWT)
 
+```
+o usuario padrão é: 
+admin@email.com 
+e a senha é:
+cresceraprender
+```
+-   *essa senha deve ser deletada após criados os primeiros usuários administradores*
 ---
 
 ## 📌 Sobre o Projeto Crescer e Aprender
