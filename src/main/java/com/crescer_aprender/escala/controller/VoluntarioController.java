@@ -1,6 +1,5 @@
 package com.crescer_aprender.escala.controller;
 
-import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.EmailAlreadyExistsException;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
@@ -40,7 +39,7 @@ public class VoluntarioController {
             Voluntario saved = service.save(voluntario);
             return ResponseEntity.ok(saved);
         } catch (EmailAlreadyExistsException e) {
-            return new ResponseEntity(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -50,7 +49,7 @@ public class VoluntarioController {
             Voluntario updated = service.update(id, voluntario);
             return ResponseEntity.ok(updated);
         } catch (EntityNotFoundException e) {
-            return new ResponseEntity(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -61,7 +60,7 @@ public class VoluntarioController {
             service.delete(id);
             return ResponseEntity.noContent().build();
         } catch (VoluntarioIsScheduledException e) {
-            return new ResponseEntity(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.UNPROCESSABLE_ENTITY);
+            return new ResponseEntity<>(Voluntario.builder().errorMessage(e.getMessage()).build(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 }

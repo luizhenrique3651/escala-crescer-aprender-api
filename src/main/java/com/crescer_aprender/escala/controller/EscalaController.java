@@ -71,18 +71,18 @@ public class EscalaController {
             Escala updated = escalaService.update(id, escala);
             return ResponseEntity.ok(updated);
         } catch (EntityNotFoundException e) {
-            return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
     }
 
     @PreAuthorize("hasAuthority('COORDENADOR')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Escala> delete(@PathVariable Long id) {
         try {
             escalaService.delete(id);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e) {
-            return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -94,7 +94,7 @@ public class EscalaController {
         try {
             return ResponseEntity.ok(escalaService.findEscalaByMesAnoVoluntario(mes, ano, idVoluntario).get());
         }catch (EntityNotFoundException e) {
-            return new ResponseEntity(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
         }
     }
 

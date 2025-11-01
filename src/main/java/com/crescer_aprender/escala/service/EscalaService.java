@@ -46,8 +46,7 @@ public class EscalaService {
     }
 
     public Optional<Escala> findByAnoAndMes(LocalDate data){
-        Optional<Escala> escala = repository.findByAnoAndMes(data.getYear(), data.getMonthValue());
-        return escala;
+        return repository.findByAnoAndMes(data.getYear(), data.getMonthValue());
     }
 
     public Optional<Escala> findById(Long id) {
