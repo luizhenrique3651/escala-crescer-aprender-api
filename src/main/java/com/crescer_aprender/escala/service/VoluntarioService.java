@@ -74,8 +74,6 @@ public class VoluntarioService {
         Voluntario oldVoluntario = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Voluntário", id));
 
         Optional.ofNullable(voluntario.getNome()).ifPresent(oldVoluntario::setNome);
-//        Optional.ofNullable(voluntario.getEmail()).ifPresent(oldVoluntario::setEmail);
-//        Optional.ofNullable(voluntario.getSenha()).ifPresent(oldVoluntario::setSenha);
         Optional.ofNullable(voluntario.getDatasDisponiveis()).ifPresent(dates -> mergeDatasDisponiveis(oldVoluntario, dates));
 
         Optional<List<Escala>> escalasDoVoluntario = escalaRepository.findByVoluntario(oldVoluntario);
