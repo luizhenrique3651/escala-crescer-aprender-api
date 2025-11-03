@@ -55,7 +55,7 @@ Na pasta raiz do projeto, execute:
 ```bash
 docker compose up --build
 ```
-ou, localmente sem Docker:
+ou, localmente sem Docker(necessário servidor postgree ativo e variáveis de ambiente configuradas no 'application.properties'):
 ```bash
 ./mvnw -DskipTests package
 java -jar target/escala-0.0.1-SNAPSHOT.jar
