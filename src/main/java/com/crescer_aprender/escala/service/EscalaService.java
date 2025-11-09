@@ -14,10 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,26 +55,33 @@ public class EscalaService {
     }
 
     public Escala save(Escala escala) {
-        Optional<Escala> escalaExistente = repository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes());
-        if (escalaExistente.isPresent()) {
-            throw new EscalaAlreadyExistsException(escala.getAno(), escala.getMes());
-        }
+
+        verificaSeHaEscalaCadastradaNaData(escala);
+
         List<Voluntario> voluntariosDisponiveis = new ArrayList<>();
         for (LocalDate data : escala.getDatas()) {
-            Optional<List<Voluntario>> listaVoluntarios = voluntarioRepository.findVoluntariosByData(data);
-            if (listaVoluntarios.isPresent()) {
+            Optional<List<Voluntario>> listaVoluntariosNaData = voluntarioRepository.findVoluntariosByData(data);
+            if (listaVoluntariosNaData.isPresent()) {
                 /*verifica se as duas listas de voluntarios tem objetos repetidos e retira de uma para
                  adicionar depois o restante na outra*/
-                listaVoluntarios.get().removeIf(v -> voluntariosDisponiveis.contains(v));
-                if (voluntariosDisponiveis.size() + listaVoluntarios.get().size() > 8) {
-                    voluntariosDisponiveis.addAll(listaVoluntarios.get().subList(0, 8 - voluntariosDisponiveis.size()));
+                listaVoluntariosNaData.get().removeIf(v -> voluntariosDisponiveis.contains(v));
+
+                //verifica se a quantidade de voluntarios ja adicionados + os da data ultrapassa 8
+                if (voluntariosDisponiveis.size() + listaVoluntariosNaData.get().size() > 8) {
+                    // embaralha a lista para tornar aleatória a seleção
+                    Collections.shuffle(listaVoluntariosNaData.get());
+                    //escala 8 voluntarios disponiveis aleatoriamente pois a lista foi embaralhada
+                    voluntariosDisponiveis.addAll(
+                            listaVoluntariosNaData.get().subList(0, 8 - voluntariosDisponiveis.size())
+                    );
                 } else {
-                    voluntariosDisponiveis.addAll(listaVoluntarios.get());
+                    voluntariosDisponiveis.addAll(listaVoluntariosNaData.get());
                 }
             }
 
         }
 
+        //verifica se os voluntarios obtidos existem no banco
         List<Long> ids = voluntariosDisponiveis.stream()
                 .map(Voluntario::getId)
                 .collect(Collectors.toList());
@@ -141,6 +145,13 @@ public class EscalaService {
     public Optional<List<Escala>> findByFiltersWithoutPagination(Map<String, String> filters) {
         List<Escala> results = repository.findAll(EscalaSpecifications.byFilters(filters));
         return Optional.ofNullable(results == null || results.isEmpty() ? null : results);
+    }
+
+    public void verificaSeHaEscalaCadastradaNaData(Escala escala){
+        Optional<Escala> escalaExistente = repository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes());
+        if (escalaExistente.isPresent()) {
+            throw new EscalaAlreadyExistsException(escala.getAno(), escala.getMes());
+        }
     }
 
 }
