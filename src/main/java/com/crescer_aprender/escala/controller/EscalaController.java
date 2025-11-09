@@ -5,6 +5,7 @@ import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
 import com.crescer_aprender.escala.exception.VoluntarioNotExistException;
 import com.crescer_aprender.escala.service.EscalaService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("crescer-aprender/escala")
 public class EscalaController {
@@ -32,6 +34,7 @@ public class EscalaController {
 
     @GetMapping
     public ResponseEntity<List<Escala>> getAll() {
+        log.info("Recebida requisição para listar todas as escalas.");
         Optional<List<Escala>> escalas = escalaService.loadAll();
         return escalas.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
@@ -39,6 +42,7 @@ public class EscalaController {
 
     @GetMapping("byId/{id}")
     public ResponseEntity<Escala> getById(@PathVariable Long id) {
+        log.info("Recebida requisição para buscar escala por ID: {}", id);
         return escalaService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -46,6 +50,7 @@ public class EscalaController {
 
     @GetMapping("byDate/{data}")
     public ResponseEntity<Escala> getByAnoAndMes(@PathVariable LocalDate data){
+        log.info("Recebida requisição para buscar escala por Ano e Mês: {}", data);
         return escalaService.findByAnoAndMes(data)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -54,6 +59,7 @@ public class EscalaController {
     @PreAuthorize("hasAuthority('COORDENADOR')")
     @PostMapping
     public ResponseEntity<Escala> create(@RequestBody Escala escala) {
+        log.info("Recebida requisição para criar nova escala.");
         try {
             Escala saved = escalaService.save(escala);
             return ResponseEntity.ok(saved);
