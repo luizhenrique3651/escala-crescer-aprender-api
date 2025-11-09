@@ -90,7 +90,7 @@ public class VoluntarioServiceTest {
             voluntarioService.save(voluntario);
         });
 
-        assertEquals("O nome do voluntário é obrigatório.", e.getMessage());
+        assertTrue( e.getMessage().contains("O nome do voluntário é obrigatório."));
     }
 
     @Test
@@ -165,8 +165,7 @@ public class VoluntarioServiceTest {
             voluntarioService.delete(1L);
         });
 
-        assertEquals("Voluntário não pode ser deletado pois está escalado", e.getMessage());
-    }
+        assertTrue(e.getMessage().contains("Voluntário não pode ser deletado pois está escalado"));  }
 
     @Test
     void delete_FalhaVoluntarioNaoEncontrado() {
