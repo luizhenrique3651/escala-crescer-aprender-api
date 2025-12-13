@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.Instant;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
@@ -17,6 +20,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        log.warn("Acesso negado para path={} motivo={}", request.getRequestURI(), accessDeniedException.getMessage());
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json;charset=UTF-8");
 
@@ -36,4 +40,3 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
-
