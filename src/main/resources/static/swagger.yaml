@@ -598,6 +598,7 @@ components:
         - mes
         - ano
         - datas
+        - voluntarios
       type: object
       properties:
         mes:
@@ -619,7 +620,6 @@ components:
           description: Lista de dias da escala com voluntários alocados (cada dia tem 4-8 voluntários)
           items:
             $ref: '#/components/schemas/EscalaDia'
-        # campo legado 'voluntarios' removido: use 'dias' para ver alocações por data
         errorMessage:
           type: string
           example: 'Erro ao salvar escala'
@@ -662,3 +662,70 @@ components:
             $ref: '#/components/schemas/EscalaDiaRequest'
           description: Lista opcional de dias com ids de voluntários por dia. Se omitido, o serviço seleciona automaticamente com base na disponibilidade.
 
+    EscalaDiaRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date
+        voluntarios:
+          type: array
+          items:
+            type: integer
+          description: Lista de IDs de voluntários para essa data
+
+    Usuario:
+      required:
+        - email
+        - senha
+      type: object
+      properties:
+        email:
+          type: string
+          example: joao@email.com
+        senha:
+          type: string
+          format: password
+          example: senhaSegura123
+        role:
+          type: string
+          example: COORDENADOR
+
+    Voluntario:
+      required:
+        - nome
+        - usuario
+      type: object
+      properties:
+        nome:
+          type: string
+          example: João da Silva
+        usuario:
+          $ref: '#/components/schemas/Usuario'
+        datasDisponiveis:
+          type: array
+          items:
+            type: string
+            format: date
+          description: Datas disponíveis do voluntário
+        errorMessage:
+          type: string
+          example: 'E-mail já está em uso'
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+security:
+  - bearerAuth: []
