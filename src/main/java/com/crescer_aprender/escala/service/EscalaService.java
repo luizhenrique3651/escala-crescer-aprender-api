@@ -37,14 +37,14 @@ public class EscalaService {
 
     public Optional<Escala> findEscalaByMesAnoVoluntario(Integer mes, Long ano, Long voluntario) {
         Optional<Escala> retorno = repository.findEscalaByMesAnoVoluntario(mes, ano, voluntario);
-        if(retorno.isPresent()){
+        if (retorno.isPresent()) {
             return retorno;
-        }else{
-            throw new EntityNotFoundException("Escala não encontrada em "+mes+"/"+ano+" com o Voluntário: "+voluntario.toString());
+        } else {
+            throw new EntityNotFoundException("Escala não encontrada em " + mes + "/" + ano + " com o Voluntário: " + voluntario.toString());
         }
     }
 
-    public Optional<Escala> findByAnoAndMes(LocalDate data){
+    public Optional<Escala> findByAnoAndMes(LocalDate data) {
         return repository.findByAnoAndMes(data.getYear(), data.getMonthValue());
     }
 
@@ -62,61 +62,29 @@ public class EscalaService {
 
         log.info("Verificando voluntários disponíveis para as datas da escala. E criando lista de voluntários disponíveis.");
         List<Voluntario> voluntariosDisponiveis = new ArrayList<>();
-        for (LocalDate data : escala.getDatas()) {
-            Optional<List<Voluntario>> listaVoluntariosNaData = voluntarioRepository.findVoluntariosByData(data);
-            if (listaVoluntariosNaData.isPresent()) {
-                /*verifica se as duas listas de voluntarios tem objetos repetidos e retira de uma para
-                 adicionar depois o restante na outra*/
-                listaVoluntariosNaData.get().removeIf(v -> voluntariosDisponiveis.contains(v));
+        verificaVoluntariosDisponiveisEAdiciona(voluntariosDisponiveis, escala);
 
-                //verifica se a quantidade de voluntarios ja adicionados + os da data ultrapassa 8
-                if (voluntariosDisponiveis.size() + listaVoluntariosNaData.get().size() > 8) {
-                    // embaralha a lista para tornar aleatória a seleção
-                    Collections.shuffle(listaVoluntariosNaData.get());
-                    //escala 8 voluntarios disponiveis aleatoriamente pois a lista foi embaralhada
-                    voluntariosDisponiveis.addAll(
-                            listaVoluntariosNaData.get().subList(0, 8 - voluntariosDisponiveis.size())
-                    );
-                } else {
-                    voluntariosDisponiveis.addAll(listaVoluntariosNaData.get());
-                }
-            }
-
-        }
         log.info("Verificando se os voluntários disponíveis existem no banco de dados.");
-        //verifica se os voluntarios obtidos existem no banco
-        List<Long> ids = voluntariosDisponiveis.stream()
-                .map(Voluntario::getId)
-                .collect(Collectors.toList());
+        verificaVoluntariosEstaoNoBanco(voluntariosDisponiveis);
 
-        Optional<List<Voluntario>> voluntariosExistentes = voluntarioRepository.findVoluntariosByIds(ids);
-        if(voluntariosExistentes.isPresent()) {
-            if (ids.size() > voluntariosExistentes.get().size()) {
-                ids.removeIf(v -> (voluntariosExistentes.get().stream().map(Voluntario::getId).equals(v)));
-                log.error("Voluntários com os IDs {} não existem no banco de dados.", ids);
-                throw new VoluntarioNotExistException(ids);
-            }
-        }else{
-            log.error("Voluntários com os IDs {} não existem no banco de dados.", ids);
-            throw new VoluntarioNotExistException(ids);
+        adicionaAleatoriosSeNenhumVoluntario(voluntariosDisponiveis, escala);
+
+        // garantir que não ultrapasse 8 voluntários na escala
+        if (escala.getVoluntarios() != null && escala.getVoluntarios().size() > 8) {
+            log.warn("Quantidade de voluntários na escala ({}) excede o limite de 8, truncando para 8.", escala.getVoluntarios().size());
+            escala.setVoluntarios(escala.getVoluntarios().subList(0, 8));
         }
 
-        if (escala.getVoluntarios() == null || escala.getVoluntarios().isEmpty()) {
-            log.info("Nenhum voluntário foi especificado na escala. Adicionando voluntários disponíveis.");
-            escala.getVoluntarios().addAll(voluntariosDisponiveis);
-        }
         return repository.save(escala);
 
     }
 
     public Escala update(Long id, Escala escala) {
-        Escala oldEscala = repository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Escala", id));
+        Escala oldEscala = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Escala", id));
 
         Optional.ofNullable(escala.getAno()).ifPresent(oldEscala::setAno);
         Optional.ofNullable(escala.getMes()).ifPresent(oldEscala::setMes);
-        Optional.ofNullable(escala.getDatas())
-                .ifPresent(dates -> mergeDatas(oldEscala, dates));
+        Optional.ofNullable(escala.getDatas()).ifPresent(dates -> mergeDatas(oldEscala, dates));
         Optional.ofNullable(escala.getVoluntarios()).ifPresent(voluntarios -> mergeVoluntarios(oldEscala, voluntarios));
         return repository.save(oldEscala);
     }
@@ -142,9 +110,7 @@ public class EscalaService {
         List<LocalDate> datasAtuais = escala.getDatas();
 
         datasAtuais.removeIf(date -> !novasDatas.contains(date));
-        novasDatas.stream()
-                .filter(date -> !datasAtuais.contains(date))
-                .forEach(datasAtuais::add);
+        novasDatas.stream().filter(date -> !datasAtuais.contains(date)).forEach(datasAtuais::add);
     }
 
     // manter compatibilidade, mas preferível o método paginado
@@ -153,14 +119,93 @@ public class EscalaService {
         return Optional.ofNullable(results == null || results.isEmpty() ? null : results);
     }
 
-    public void verificaSeHaEscalaCadastradaNaData(Escala escala){
+    public void verificaSeHaEscalaCadastradaNaData(Escala escala) {
         log.info("Verificando se já existe escala cadastrada para o ano {} e mês {}", escala.getAno(), escala.getMes());
         Optional<Escala> escalaExistente = repository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes());
         if (escalaExistente.isPresent()) {
             log.info("Já existe uma escala cadastrada para o ano {} e mês {}", escala.getAno(), escala.getMes());
             throw new EscalaAlreadyExistsException(escala.getAno(), escala.getMes());
         }
-
     }
 
+    /*Além de verificar quais voluntários estão disponíveis nas datas, caso hajam mais de 8 disponíveis, a escolha
+     * dos voluntários a serem escalados é feita aleatoriamente(só pode ter no máximo 8 voluntários na escala).*/
+    public void verificaVoluntariosDisponiveisEAdiciona(List<Voluntario> voluntariosDisponiveis, Escala escala) {
+        if (escala.getDatas() == null || escala.getDatas().isEmpty()) {
+            log.debug("Escala sem datas definidas, pulando verificação de disponibilidade");
+            return;
+        }
+        for (LocalDate data : escala.getDatas()) {
+            Optional<List<Voluntario>> listaVoluntariosNaData = voluntarioRepository.findVoluntariosByData(data);
+            if (listaVoluntariosNaData.isPresent()) {
+                /*verifica se as duas listas de voluntarios tem objetos repetidos e retira de uma para
+                 adicionar depois o restante na outra*/
+                listaVoluntariosNaData.get().removeIf(v -> voluntariosDisponiveis.contains(v));
+                //verifica se a quantidade de voluntarios ja adicionados + os da data ultrapassa 8
+                if (voluntariosDisponiveis.size() + listaVoluntariosNaData.get().size() > 8) {
+                    // embaralha a lista para tornar aleatória a seleção
+                    Collections.shuffle(listaVoluntariosNaData.get());
+                    //escala 8 voluntarios disponiveis aleatoriamente pois a lista foi embaralhada
+                    voluntariosDisponiveis.addAll(listaVoluntariosNaData.get().subList(0, 8 - voluntariosDisponiveis.size()));
+                } else {
+                    voluntariosDisponiveis.addAll(listaVoluntariosNaData.get());
+                }
+            }
+        }
+    }
+
+    private void verificaVoluntariosEstaoNoBanco(List<Voluntario> voluntariosDisponiveis) {
+        if (voluntariosDisponiveis == null || voluntariosDisponiveis.isEmpty()) {
+            log.debug("Nenhum voluntário disponível para verificar no banco");
+            return;
+        }
+
+        List<Long> idsVoluntariosDisponiveis = voluntariosDisponiveis.stream()
+                .map(Voluntario::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (idsVoluntariosDisponiveis.isEmpty()) {
+            log.debug("IDs dos voluntários disponíveis vazios após filtragem de nulls");
+            return;
+        }
+
+        Optional<List<Voluntario>> voluntariosExistentes = voluntarioRepository.findVoluntariosByIds(idsVoluntariosDisponiveis);
+        if (voluntariosExistentes.isPresent()) {
+            Set<Long> existentes = voluntariosExistentes.get().stream()
+                    .map(Voluntario::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            List<Long> ausentes = idsVoluntariosDisponiveis.stream()
+                    .filter(id -> !existentes.contains(id))
+                    .collect(Collectors.toList());
+
+            if (!ausentes.isEmpty()) {
+                log.error("Voluntários com os IDs {} não existem no banco de dados.", ausentes);
+                throw new VoluntarioNotExistException(ausentes);
+            }
+        } else {
+            log.error("Voluntários com os IDs {} não existem no banco de dados.", idsVoluntariosDisponiveis);
+            throw new VoluntarioNotExistException(idsVoluntariosDisponiveis);
+        }
+    }
+
+    private void adicionaAleatoriosSeNenhumVoluntario(List<Voluntario> voluntariosDisponiveis, Escala escala) {
+        if (escala.getVoluntarios() == null) {
+            escala.setVoluntarios(new ArrayList<>());
+        }
+        if (escala.getVoluntarios().isEmpty()) {
+            log.info("Nenhum voluntário foi especificado na escala. Adicionando voluntários disponíveis de forma aleatória.");
+            if (voluntariosDisponiveis == null || voluntariosDisponiveis.isEmpty()) {
+                log.warn("Não há voluntários disponíveis para adicionar à escala");
+                return;
+            }
+            // embaralha para aleatoriedade e limita a 8
+            Collections.shuffle(voluntariosDisponiveis);
+            int limit = Math.min(8, voluntariosDisponiveis.size());
+            escala.getVoluntarios().addAll(voluntariosDisponiveis.subList(0, limit));
+            log.info("Adicionados {} voluntários à escala", escala.getVoluntarios().size());
+        }
+    }
 }

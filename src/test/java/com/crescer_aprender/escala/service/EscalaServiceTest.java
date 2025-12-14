@@ -7,6 +7,7 @@ import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
+import com.crescer_aprender.escala.exception.VoluntarioNotExistException;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 
@@ -235,5 +236,44 @@ class EscalaServiceTest {
         assertEquals(1, resultado.getTotalElements());
         assertEquals(1, resultado.getContent().size());
         assertEquals(escala, resultado.getContent().get(0));
+    }
+
+    @Test
+    void testSave_VoluntariosAusentes_DeveLancarException() {
+        Escala escala = criaEscalaExemplo();
+        escala.setVoluntarios(new ArrayList<>());
+
+        List<Voluntario> voluntariosData1 = Arrays.asList(criaVoluntarioExemplo(1L));
+        List<Voluntario> voluntariosData2 = Arrays.asList(criaVoluntarioExemplo(2L));
+
+        when(escalaRepository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes())).thenReturn(Optional.empty());
+        when(voluntarioRepository.findVoluntariosByData(LocalDate.of(2025, 7, 5)))
+                .thenReturn(Optional.of(new ArrayList<>(voluntariosData1)));
+        when(voluntarioRepository.findVoluntariosByData(LocalDate.of(2025, 7, 12)))
+                .thenReturn(Optional.of(new ArrayList<>(voluntariosData2)));
+        // Simula que só o voluntário 1 existe no banco (2 está ausente)
+        when(voluntarioRepository.findVoluntariosByIds(List.of(1L, 2L))).thenReturn(Optional.of(new ArrayList<>(List.of(criaVoluntarioExemplo(1L)))));
+
+        VoluntarioNotExistException exception = assertThrows(VoluntarioNotExistException.class,
+                () -> escalaService.save(escala));
+
+        assertNotNull(exception.getMessage());
+        assertTrue(exception.getMessage().contains("2"));
+        verify(escalaRepository, never()).save(any());
+    }
+
+    @Test
+    void testSave_SemDatasNaoAdicionaVoluntarios() {
+        Escala escala = criaEscalaExemplo();
+        escala.setDatas(Collections.emptyList());
+        escala.setVoluntarios(new ArrayList<>());
+
+        when(escalaRepository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes())).thenReturn(Optional.empty());
+        when(escalaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        Escala saved = escalaService.save(escala);
+        assertNotNull(saved);
+        assertTrue(saved.getVoluntarios().isEmpty());
+        verify(escalaRepository, times(1)).save(any());
     }
 }

@@ -9,6 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -21,13 +24,17 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestBody AuthRequest authRequest) {
+        log.info("Tentativa de login para usuário={}", authRequest.getUsername());
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return jwtService.generateToken(userDetails);
+            String token = jwtService.generateToken(userDetails);
+            log.info("Login bem-sucedido para usuário={}", authRequest.getUsername());
+            return token;
         } catch (Exception e) {
+            log.warn("Falha no login para usuário={}: {}", authRequest.getUsername(), e.getMessage());
             return e.getMessage();
         }
     }
