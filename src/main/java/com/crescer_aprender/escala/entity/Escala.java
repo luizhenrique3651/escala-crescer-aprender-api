@@ -29,6 +29,10 @@ public class Escala {
 	@Column(name = "DATAS_ESCALA")
 	List<LocalDate> datas;
 
+	// novo: representa os voluntários escalados por cada data (1..n dias)
+	@OneToMany(mappedBy = "escala", cascade = CascadeType.ALL, orphanRemoval = true)
+	List<EscalaDia> dias;
+
 	@ManyToMany
 	@JoinTable(
 			name = "escala_voluntario",
