@@ -82,7 +82,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Escala'
+              $ref: '#/components/schemas/EscalaCreateRequest'
+            example:
+              mes: 12
+              ano: 2025
+              datas:
+                - '2025-12-07'
+                - '2025-12-14'
+              dias:
+                - data: '2025-12-07'
+                  voluntarios: [1, 2]
+              voluntarios: [1,2]
       responses:
         '200':
           description: Escala criada
@@ -606,14 +616,74 @@ components:
           items:
             type: string
             format: date
+        dias:
+          type: array
+          description: Lista de dias da escala com voluntários alocados (cada dia tem 4-8 voluntários)
+          items:
+            $ref: '#/components/schemas/EscalaDia'
         voluntarios:
           type: array
-          description: Voluntários da escala
+          description: Voluntários da escala (união dos voluntários alocados por dia, mantido por compatibilidade)
           items:
             $ref: '#/components/schemas/Voluntario'
         errorMessage:
           type: string
           example: 'Erro ao salvar escala'
+
+    EscalaDia:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date
+          description: Data do dia na escala
+        voluntarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Voluntario'
+          description: Voluntários escalados para essa data (4..8)
+      description: Representa a alocação de voluntários por dia dentro de uma `Escala`
+
+    EscalaCreateRequest:
+      type: object
+      required:
+        - mes
+        - ano
+        - datas
+      properties:
+        mes:
+          type: integer
+          example: 12
+        ano:
+          type: integer
+          example: 2025
+        datas:
+          type: array
+          items:
+            type: string
+            format: date
+        dias:
+          type: array
+          items:
+            $ref: '#/components/schemas/EscalaDiaRequest'
+          description: Lista opcional de dias com ids de voluntários por dia. Se omitido, o serviço seleciona automaticamente com base na disponibilidade.
+        voluntarios:
+          type: array
+          items:
+            type: integer
+          description: Lista legada de ids de voluntários (união). Opcional.
+
+    EscalaDiaRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date
+        voluntarios:
+          type: array
+          items:
+            type: integer
+          description: Lista de IDs de voluntários para essa data
 
     Usuario:
       required:
