@@ -62,7 +62,7 @@
     <text x="260" y="1430" class="title">PostgreSQL</text>
     <text x="260" y="1470" class="small">Migrações com Flyway</text>
 
-    <!-- Qualidade & CI -->
+    <!-- Qualidade &amp; CI -->
     <rect x="60" y="1560" width="450" height="220" class="box-muted"/>
     <text x="100" y="1600" class="title">Qualidade e CI</text>
     <text x="100" y="1640" class="small">JUnit + Mockito (testes unitários)</text>
@@ -86,7 +86,7 @@
     <path class="arrow" d="M540 1200 L540 1220" />  <!-- Segurança → Repositório -->
     <path class="arrow" d="M540 1360 L540 1380" />  <!-- Repositório → Banco de dados -->
 
-    <path class="arrow" d="M260 1540 L260 1380" />  <!-- Qualidade & CI → Repositório / app -->
+    <path class="arrow" d="M260 1540 L260 1380" />  <!-- Qualidade &amp; CI → Repositório / app -->
     <path class="arrow" d="M750 1540 L750 1380" />  <!-- Infraestrutura → app -->
 
     <!-- Legenda -->
