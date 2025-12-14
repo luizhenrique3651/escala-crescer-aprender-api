@@ -1,6 +1,7 @@
 package com.crescer_aprender.escala.service;
 
 import com.crescer_aprender.escala.entity.Escala;
+import com.crescer_aprender.escala.entity.EscalaDia;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
 import com.crescer_aprender.escala.exception.*;
@@ -85,7 +86,6 @@ public class VoluntarioService {
     }
 
     public Voluntario update(Long id, Voluntario voluntario) {
-        log.info("Iniciando atualização do voluntário id={}", id);
         Voluntario oldVoluntario = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Voluntário", id));
 
         Optional.ofNullable(voluntario.getNome()).ifPresent(oldVoluntario::setNome);
@@ -95,21 +95,27 @@ public class VoluntarioService {
 
         if(escalasDoVoluntario.isPresent()){
             for (Escala escala : escalasDoVoluntario.get()) {
-                // Remover voluntário da escala caso não esteja disponível para alguma das datas da escala
-                escala.getVoluntarios().removeIf(v -> v.getId().equals(oldVoluntario.getId()) &&
-                        escala.getDatas().stream().anyMatch(date -> !oldVoluntario.getDatasDisponiveis().contains(date)));
-                escalaRepository.save(escala);
-                log.debug("Atualizada escala id={} ao remover/ajustar voluntário id={}", escala.getId(), oldVoluntario.getId());
+                // Para cada dia da escala, remover o voluntário do dia caso ele não esteja disponível para aquela data
+                boolean modified = false;
+                if (escala.getDias() != null) {
+                    for (EscalaDia dia : escala.getDias()) {
+                        if (dia.getVoluntarios() != null) {
+                            boolean removed = dia.getVoluntarios().removeIf(v -> v.getId().equals(oldVoluntario.getId()) &&
+                                    !oldVoluntario.getDatasDisponiveis().contains(dia.getData()));
+                            if (removed) modified = true;
+                        }
+                    }
+                }
+                if (modified) {
+                    escalaRepository.save(escala);
+                }
             }
 
         }
-        Voluntario updated = repository.save(oldVoluntario);
-        log.info("Atualização concluída para voluntário id={}", updated.getId());
-        return updated;
+        return repository.save(oldVoluntario);
     }
 
     public Optional<List<Voluntario>> findVoluntariosByData(LocalDate data) {
-        log.debug("Buscando voluntários disponíveis na data={}", data);
         return repository.findVoluntariosByData(data);
     }
 
@@ -123,7 +129,7 @@ public class VoluntarioService {
     public boolean delete(Long id) {
         log.info("Tentativa de deletar voluntário id={}", id);
         if (repository.existsById(id)) {
-            if(escalaRepository.existsByVoluntarios(Voluntario.builder().id(id).build())){
+            if(escalaRepository.existsByVoluntarioId(id)){
                 log.warn("Não é possível deletar voluntário id={} pois ele está escalado", id);
                 throw new VoluntarioIsScheduledException();
             }

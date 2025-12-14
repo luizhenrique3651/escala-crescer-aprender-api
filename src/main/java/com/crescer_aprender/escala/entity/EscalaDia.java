@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Data
@@ -32,9 +33,9 @@ public class EscalaDia {
 
     @ManyToOne
     @JoinColumn(name = "escala_id")
+    @JsonBackReference
     Escala escala;
 
     @Transient
     String errorMessage;
 }
-

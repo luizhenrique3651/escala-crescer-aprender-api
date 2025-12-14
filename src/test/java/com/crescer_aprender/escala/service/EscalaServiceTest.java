@@ -48,7 +48,6 @@ class EscalaServiceTest {
                 .ano(2025L)
                 .mes(7)
                 .datas(Arrays.asList(LocalDate.of(2025, 7, 5), LocalDate.of(2025, 7, 12)))
-                .voluntarios(new ArrayList<>())
                 .build();
     }
 
@@ -139,7 +138,7 @@ class EscalaServiceTest {
     @Test
     void testSave_SemVoluntariosAdicionaDisponiveis() {
         Escala escala = criaEscalaExemplo();
-        escala.setVoluntarios(new ArrayList<>());
+        // não usar mais campo legado de voluntarios; o serviço gerará `dias` automaticamente
 
         // criar 4 voluntários para cada data (mínimo exigido)
         List<Voluntario> voluntariosData1 = Arrays.asList(
@@ -169,15 +168,15 @@ class EscalaServiceTest {
 
         Escala saved = escalaService.save(escala);
         assertNotNull(saved);
-        assertFalse(saved.getVoluntarios().isEmpty());
         // Verifica se foram criados dias com voluntários
         assertNotNull(saved.getDias());
         assertEquals(2, saved.getDias().size());
         for (EscalaDia dia : saved.getDias()) {
             assertTrue(dia.getVoluntarios().size() >= 4 && dia.getVoluntarios().size() <= 8);
         }
-        // Verifica se total de voluntários na lista agregada não ultrapassa 8 por dia (mas como union pode ser 8)
-        assertTrue(saved.getVoluntarios().size() <= 8);
+        // Verifica se lista agregada derivada das dias tem até 8 voluntários distintos
+        List<Long> aggregated = saved.getDias().stream().flatMap(d -> d.getVoluntarios().stream()).map(Voluntario::getId).distinct().toList();
+        assertTrue(aggregated.size() <= 8);
     }
 
     @Test
@@ -187,7 +186,6 @@ class EscalaServiceTest {
                 .ano(2026L)
                 .mes(8)
                 .datas(new ArrayList<>(Arrays.asList(LocalDate.of(2025, 7, 5), LocalDate.of(2025, 7, 12))))
-                .voluntarios(Arrays.asList(criaVoluntarioExemplo(99L)))
                 .build();
 
         when(escalaRepository.findById(1L)).thenReturn(Optional.of(antiga));
@@ -203,7 +201,6 @@ class EscalaServiceTest {
         assertEquals(2026L, atualizada.getAno());
         assertEquals(8, atualizada.getMes());
         assertTrue(atualizada.getDatas().contains(LocalDate.of(2025, 7, 5)));
-        assertTrue(atualizada.getVoluntarios().stream().anyMatch(v -> v.getId().equals(99L)));
     }
 
     @Test
@@ -270,7 +267,7 @@ class EscalaServiceTest {
     @Test
     void testSave_VoluntariosAusentes_DeveLancarException() {
         Escala escala = criaEscalaExemplo();
-        escala.setVoluntarios(new ArrayList<>());
+        // não usar campo legado
 
         List<Voluntario> voluntariosData1 = Arrays.asList(criaVoluntarioExemplo(1L));
         List<Voluntario> voluntariosData2 = Arrays.asList(criaVoluntarioExemplo(2L));

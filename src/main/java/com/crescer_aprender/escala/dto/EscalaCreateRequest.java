@@ -18,7 +18,5 @@ public class EscalaCreateRequest {
     List<LocalDate> datas;
     // opcional: lista de dias com IDs de voluntarios por dia
     List<EscalaDiaRequest> dias;
-    // opcional: lista de ids de voluntarios (legacy)
-    List<Long> voluntarios;
+    // o campo legado 'voluntarios' foi removido - favor usar 'dias[].voluntarios' ou omitir para seleção automática
 }
-

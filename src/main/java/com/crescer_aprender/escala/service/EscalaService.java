@@ -74,7 +74,6 @@ public class EscalaService {
 
         // se foram passados dias com ids de voluntarios, converte para EscalaDia
         List<EscalaDia> dias = new ArrayList<>();
-        Set<Voluntario> union = new LinkedHashSet<>();
         if (request.getDias() != null && !request.getDias().isEmpty()) {
             for (EscalaDiaRequest dr : request.getDias()) {
                 EscalaDia dia = new EscalaDia();
@@ -91,7 +90,6 @@ public class EscalaService {
                         throw new VoluntarioNotExistException(missing);
                     }
                     dia.setVoluntarios(vs.get());
-                    union.addAll(vs.get());
                     // valida disponibilidade: cada voluntario especificado deve conter a data em datasDisponiveis
                     List<Long> notAvailable = vs.get().stream()
                             .filter(v -> v.getDatasDisponiveis() == null || !v.getDatasDisponiveis().contains(dr.getData()))
@@ -111,29 +109,14 @@ public class EscalaService {
                     int seleciona = Math.min(8, c.size());
                     List<Voluntario> selecionados = new ArrayList<>(c.subList(0, seleciona));
                     dia.setVoluntarios(selecionados);
-                    union.addAll(selecionados);
                 }
                 dias.add(dia);
             }
         }
 
-        // se veio somente lista de voluntarios ids no body (legacy), resolve e adiciona à escala.voluntarios (união)
-        if (request.getVoluntarios() != null && !request.getVoluntarios().isEmpty()) {
-            Optional<List<Voluntario>> vs = voluntarioRepository.findVoluntariosByIds(request.getVoluntarios());
-            if (vs.isEmpty() || vs.get().size() != request.getVoluntarios().size()) {
-                List<Long> missing = new ArrayList<>();
-                if (vs.isPresent()) {
-                    Set<Long> found = vs.get().stream().map(Voluntario::getId).collect(Collectors.toSet());
-                    for (Long id : request.getVoluntarios()) if (!found.contains(id)) missing.add(id);
-                } else missing.addAll(request.getVoluntarios());
-                throw new VoluntarioNotExistException(missing);
-            }
-            union.addAll(vs.get());
-        }
-
         dias.forEach(d -> d.setEscala(escala));
         escala.setDias(dias);
-        escala.setVoluntarios(new ArrayList<>(union));
+        // removido campo legado escala.voluntarios; alocação por dia está em escala.dias
 
         return saveEscalaEntity(escala);
     }
@@ -152,7 +135,6 @@ public class EscalaService {
         } else {
             // compatibilidade: se não houver dias preenchidos, seleciona voluntários por data (4..8) baseado nas disponibilidades
             List<EscalaDia> diasGerados = new ArrayList<>();
-            Set<Voluntario> union = new LinkedHashSet<>();
             if (escala.getDatas() == null || escala.getDatas().isEmpty()) {
                 throw new InvalidVoluntarioDataException("A escala deve conter pelo menos uma data.");
             }
@@ -170,18 +152,23 @@ public class EscalaService {
                 dia.setData(data);
                 dia.setVoluntarios(selecionados);
                 diasGerados.add(dia);
-                union.addAll(selecionados);
             }
             diasGerados.forEach(d -> d.setEscala(escala));
             escala.setDias(diasGerados);
-            if (escala.getVoluntarios() == null || escala.getVoluntarios().isEmpty()) {
-                escala.setVoluntarios(new ArrayList<>(union));
-            }
+            // removido campo legado escala.voluntarios; diasGerados já contém as alocações por dia
         }
 
         // verifica existência dos voluntários da união
+        // coletar ids de voluntários a partir de escala.dias (união)
         List<Long> ids = new ArrayList<>();
-        if (escala.getVoluntarios() != null) ids = escala.getVoluntarios().stream().map(Voluntario::getId).collect(Collectors.toList());
+        if (escala.getDias() != null) {
+            ids = escala.getDias().stream()
+                    .filter(d -> d.getVoluntarios() != null)
+                    .flatMap(d -> d.getVoluntarios().stream())
+                    .map(Voluntario::getId)
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
         if (!ids.isEmpty()) {
             Optional<List<Voluntario>> voluntariosExistentes = voluntarioRepository.findVoluntariosByIds(ids);
             if (voluntariosExistentes.isEmpty() || voluntariosExistentes.get().size() != ids.size()) {
@@ -232,11 +219,9 @@ public class EscalaService {
                     diasRecriados.forEach(d -> d.setEscala(oldEscala));
                     oldEscala.setDias(diasRecriados);
 
-                    if (oldEscala.getVoluntarios() == null || oldEscala.getVoluntarios().isEmpty()) {
-                        oldEscala.setVoluntarios(new ArrayList<>(voluntariosUnion));
-                    }
+                    // removido campo legado escala.voluntarios; a alocação fica em oldEscala.dias
                 });
-        Optional.ofNullable(escala.getVoluntarios()).ifPresent(voluntarios -> mergeVoluntarios(oldEscala, voluntarios));
+        // antigo suporte a mergeVoluntarios removido; use apenas escala.dias para atualizar alocações por dia
         return repository.save(oldEscala);
     }
 
@@ -249,13 +234,6 @@ public class EscalaService {
         }
     }
 
-    private void mergeVoluntarios(Escala escala, List<Voluntario> novosVoluntarios) {
-        List<Voluntario> voluntariosAtuais = escala.getVoluntarios();
-
-        voluntariosAtuais.removeIf(voluntario -> !novosVoluntarios.contains(voluntario));
-        novosVoluntarios.stream().filter(voluntario -> !voluntariosAtuais.contains(voluntario)).forEach(voluntariosAtuais::add);
-
-    }
 
     private void mergeDatas(Escala escala, List<LocalDate> novasDatas) {
         List<LocalDate> datasAtuais = escala.getDatas();

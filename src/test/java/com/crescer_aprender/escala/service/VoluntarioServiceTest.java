@@ -149,7 +149,7 @@ public class VoluntarioServiceTest {
     @Test
     void delete_Sucesso() {
         when(voluntarioRepository.existsById(1L)).thenReturn(true);
-        when(escalaRepository.existsByVoluntarios(any())).thenReturn(false);
+        when(escalaRepository.existsByVoluntarioId(anyLong())).thenReturn(false);
         doNothing().when(voluntarioRepository).deleteById(1L);
 
         assertTrue(voluntarioService.delete(1L));
@@ -159,7 +159,7 @@ public class VoluntarioServiceTest {
     @Test
     void delete_FalhaVoluntarioEmEscala() {
         when(voluntarioRepository.existsById(1L)).thenReturn(true);
-        when(escalaRepository.existsByVoluntarios(any())).thenReturn(true);
+        when(escalaRepository.existsByVoluntarioId(anyLong())).thenReturn(true);
 
         VoluntarioIsScheduledException e = assertThrows(VoluntarioIsScheduledException.class, () -> {
             voluntarioService.delete(1L);
