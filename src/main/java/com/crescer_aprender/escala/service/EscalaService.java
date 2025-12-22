@@ -186,8 +186,12 @@ public class EscalaService {
                 voluntariosUnion.addAll(selecionados);
             }
             diasRecriados.forEach(d -> d.setEscala(oldEscala));
-            oldEscala.getDias().clear();
-            oldEscala.getDias().addAll(diasRecriados);
+            if(escala.getDias() != null) {
+                oldEscala.getDias().clear();
+            }else{
+                oldEscala.setDias(new ArrayList<>());
+            }
+                oldEscala.getDias().addAll(diasRecriados);
 
             // removido campo legado escala.voluntarios; a alocação fica em oldEscala.dias
         });
