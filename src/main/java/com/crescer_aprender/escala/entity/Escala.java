@@ -25,7 +25,7 @@ public class Escala {
 
 	@Column(name = "ANO_ESCALA")
 	Long ano;
-
+    //@TODO verificar necessidade de usar ainda esse campo
 	@ElementCollection
 	@Column(name = "DATAS_ESCALA")
 	List<LocalDate> datas;

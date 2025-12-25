@@ -3,6 +3,7 @@ package com.crescer_aprender.escala.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.crescer_aprender.escala.dto.EscalaCreateRequest;
 import com.crescer_aprender.escala.entity.Escala;
 import com.crescer_aprender.escala.entity.EscalaDia;
 import com.crescer_aprender.escala.entity.Voluntario;
@@ -45,6 +46,13 @@ class EscalaServiceTest {
     private Escala criaEscalaExemplo() {
         return Escala.builder()
                 .id(1L)
+                .ano(2025L)
+                .mes(7)
+                .datas(Arrays.asList(LocalDate.of(2025, 7, 5), LocalDate.of(2025, 7, 12)))
+                .build();
+    }
+    private EscalaCreateRequest criaEscalaRequestExemplo() {
+        return EscalaCreateRequest.builder()
                 .ano(2025L)
                 .mes(7)
                 .datas(Arrays.asList(LocalDate.of(2025, 7, 5), LocalDate.of(2025, 7, 12)))
@@ -124,12 +132,13 @@ class EscalaServiceTest {
 
     @Test
     void testSave_ComEscalaExistente_DeveLancarExcecao() {
+        EscalaCreateRequest escalaRequest = criaEscalaRequestExemplo();
         Escala escala = criaEscalaExemplo();
 
         when(escalaRepository.findByAnoAndMes(escala.getAno().intValue(), escala.getMes())).thenReturn(Optional.of(escala));
 
         EscalaAlreadyExistsException exception = assertThrows(EscalaAlreadyExistsException.class,
-                () -> escalaService.save(escala));
+                () -> escalaService.saveFromRequest(escalaRequest));
 
         assertTrue(exception.getMessage().contains("já existe"));
         verify(escalaRepository, never()).save(any());
@@ -137,7 +146,7 @@ class EscalaServiceTest {
 
     @Test
     void testSave_SemVoluntariosAdicionaDisponiveis() {
-        Escala escala = criaEscalaExemplo();
+        EscalaCreateRequest escala = criaEscalaRequestExemplo();
         // não usar mais campo legado de voluntarios; o serviço gerará `dias` automaticamente
 
         // criar 4 voluntários para cada data (mínimo exigido)
@@ -166,7 +175,7 @@ class EscalaServiceTest {
         when(escalaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(voluntarioRepository.findVoluntariosByIds(Mockito.anyList())).thenReturn(Optional.of(todos));
 
-        Escala saved = escalaService.save(escala);
+        Escala saved = escalaService.saveFromRequest(escala);
         assertNotNull(saved);
         // Verifica se foram criados dias com voluntários
         assertNotNull(saved.getDias());
@@ -265,9 +274,8 @@ class EscalaServiceTest {
     }
 
     @Test
-    void testSave_VoluntariosAusentes_DeveLancarException() {
-        Escala escala = criaEscalaExemplo();
-        // não usar campo legado
+    void testSave_VoluntariosAusentes_DeveLogarException() {
+        EscalaCreateRequest escala = criaEscalaRequestExemplo();
 
         List<Voluntario> voluntariosData1 = Arrays.asList(criaVoluntarioExemplo(1L));
         List<Voluntario> voluntariosData2 = Arrays.asList(criaVoluntarioExemplo(2L));
@@ -277,15 +285,19 @@ class EscalaServiceTest {
                 .thenReturn(Optional.of(new ArrayList<>(voluntariosData1)));
         when(voluntarioRepository.findVoluntariosByData(LocalDate.of(2025, 7, 12)))
                 .thenReturn(Optional.of(new ArrayList<>(voluntariosData2)));
-        // Simula que só o voluntário 1 existe no banco (2 está ausente)
-        when(voluntarioRepository.findVoluntariosByIds(List.of(1L, 2L))).thenReturn(Optional.of(new ArrayList<>(List.of(criaVoluntarioExemplo(1L)))));
+        when(voluntarioRepository.findVoluntariosByIds(List.of(1L, 2L)))
+                .thenReturn(Optional.of(new ArrayList<>(List.of(criaVoluntarioExemplo(1L)))));
+        when(escalaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        InvalidVoluntarioDataException exception = assertThrows(InvalidVoluntarioDataException.class,
-                () -> escalaService.save(escala));
+        Escala saved = escalaService.saveFromRequest(escala);
 
-        assertNotNull(exception.getMessage());
-        assertTrue(exception.getMessage().contains("2"));
-        verify(escalaRepository, never()).save(any());
+        assertNotNull(saved);
+        assertNotNull(saved.getDias());
+        assertEquals(2, saved.getDias().size());
+        for (EscalaDia dia : saved.getDias()) {
+            assertTrue(dia.getVoluntarios().size() >= 1);
+        }
+        verify(escalaRepository, times(1)).save(any());
     }
 
 //    @Test

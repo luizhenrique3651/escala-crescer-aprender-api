@@ -3,6 +3,8 @@ package com.crescer_aprender.escala.controller;
 import com.crescer_aprender.escala.security.JwtService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,7 +25,7 @@ public class AuthController {
     private JwtService jwtService;
 
     @PostMapping("/login")
-    public String login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) {
         log.info("Tentativa de login para usuário={}", authRequest.getUsername());
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -32,10 +34,11 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtService.generateToken(userDetails);
             log.info("Login bem-sucedido para usuário={}", authRequest.getUsername());
-            return token;
+            return ResponseEntity.ok(token);
         } catch (Exception e) {
             log.warn("Falha no login para usuário={}: {}", authRequest.getUsername(), e.getMessage());
-            return e.getMessage();
+            // Não expor mensagem de exceção interna ao cliente
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
         }
     }
 
@@ -43,5 +46,5 @@ public class AuthController {
     public static class AuthRequest {
         private String username;
         private String password;
-}
+    }
 }

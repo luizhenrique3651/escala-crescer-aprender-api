@@ -62,27 +62,15 @@ public class EscalaController {
     @PostMapping
     public ResponseEntity<Escala> create(@RequestBody EscalaCreateRequest request) {
         log.info("Recebida requisição para criar nova escala via DTO.");
-        try {
             Escala saved = escalaService.saveFromRequest(request);
             return ResponseEntity.ok(saved);
-        } catch (EscalaAlreadyExistsException e) {
-            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
-        } catch(VoluntarioNotExistException e){
-            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
-        } catch(InvalidVoluntarioDataException e){
-            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
-        }
     }
 
     @PreAuthorize("hasAuthority('COORDENADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<Escala> update(@PathVariable Long id, @RequestBody Escala escala) {
-        try {
             Escala updated = escalaService.update(id, escala);
             return ResponseEntity.ok(updated);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.NOT_FOUND);
-        }
     }
 
     @PreAuthorize("hasAuthority('COORDENADOR')")
