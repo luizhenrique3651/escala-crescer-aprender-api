@@ -165,6 +165,7 @@ public class EscalaService {
         // Metodo que verifica se a request foram passados dias completos com voluntários
         List<EscalaDia> dias = new ArrayList<>();
         if (request.getDias() != null && !request.getDias().isEmpty()) {
+            log.info("Percorrendo dias passados pela request, para maepar em EscalaDia e adicionar os voluntários...");
             for (EscalaDiaRequest diaRequest : request.getDias()) {
                 log.info("Processando EscalaDiaRequest para data = {}", diaRequest.getData());
                 EscalaDia escalaDia = new EscalaDia();
@@ -174,11 +175,11 @@ public class EscalaService {
                     // busca por ids
                     Optional<List<Voluntario>> voluntariosNoBanco = voluntarioRepository.findVoluntariosByIds(diaRequest.getVoluntarios());
                     if (voluntariosNoBanco.isPresent()) {
+                        log.info("Validando voluntarios para data = {}", diaRequest.getVoluntarios());
                         validaVoluntariosExistentes(diaRequest, voluntariosNoBanco);
                         validaDisponibilidadeVoluntarios(diaRequest, voluntariosNoBanco);
-                        log.info("Validando voluntarios para data = {}", diaRequest.getVoluntarios());
                         escalaDia.setVoluntarios(voluntariosNoBanco.get());
-                        log.info("Voluntarios atribuídos para data = {}", diaRequest.getData());
+                        log.info("Voluntarios validados e atribuídos para data = {}", diaRequest.getData());
 
                     }
                 } else {
