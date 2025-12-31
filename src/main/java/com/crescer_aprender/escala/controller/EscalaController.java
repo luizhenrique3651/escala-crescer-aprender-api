@@ -135,4 +135,14 @@ public class EscalaController {
         return results.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
+    @PutMapping("/popula-voluntarios/{idEscala}")
+    public ResponseEntity<Escala> populateVoluntarios(@PathVariable Long idEscala) {
+        try {
+            log.info("Populando escala previamente criada com dias a partir da lista de datas... | IdEscala ={}", idEscala);
+            return ResponseEntity.ok(escalaService.populaEscalaComVoluntarios(idEscala));
+        } catch (Exception e) {
+            log.error("Erro ao popular escala previamente criada com dias a partir da lista de datas | Error={}",e.getMessage());
+            return new ResponseEntity<>(Escala.builder().errorMessage(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
