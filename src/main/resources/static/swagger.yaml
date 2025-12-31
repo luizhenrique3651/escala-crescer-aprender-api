@@ -211,6 +211,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /crescer-aprender/escala/popula-voluntarios/{idEscala}:
+    put:
+      tags:
+        - Escala
+      summary: Popula uma escala existente com voluntários (preenche os dias com voluntários disponíveis)
+      description: >-
+        Popula a escala identificada por `idEscala` com voluntários disponíveis para as datas já criadas na escala. O endpoint delega à lógica de serviço
+        a seleção automática dos voluntários por data.
+        
+        Observação: no controller atual o método está mapeado com `@PutMapping("/popula-voluntarios/{idEscala}")` mas o parâmetro do método usa `@RequestHeader`.
+        Isso é inconsistente com a presença de `{idEscala}` na URL — o parâmetro deveria ser `@PathVariable Long idEscala` para funcionar como esperado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: idEscala
+          in: path
+          description: ID da escala a ser populada com voluntários
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Escala populada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escala'
+        '404':
+          description: Escala não encontrada
+        '500':
+          description: Erro interno ao popular escala (ver mensagem no campo `errorMessage` do corpo quando aplicável)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /crescer-aprender/escala/buscar-por-mes-ano-voluntario:
     get:
       tags:
@@ -601,6 +637,11 @@ components:
         - voluntarios
       type: object
       properties:
+        id:
+          type: integer
+          example: 1
+          description: Id da escala
+
         mes:
           type: integer
           example: 7

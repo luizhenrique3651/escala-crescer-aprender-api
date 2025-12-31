@@ -1,5 +1,6 @@
 package com.crescer_aprender.escala.dto;
 
+import com.crescer_aprender.escala.entity.Escala;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +20,12 @@ public class EscalaCreateRequest {
     // opcional: lista de dias com IDs de voluntarios por dia
     List<EscalaDiaRequest> dias;
     // o campo legado 'voluntarios' foi removido - favor usar 'dias[].voluntarios' ou omitir para seleção automática
+
+    public static EscalaCreateRequest of(Escala escala){
+        return EscalaCreateRequest.builder()
+                .mes(escala.getMes())
+                .ano(escala.getAno())
+                .datas(escala.getDatas())
+                .dias(EscalaDiaRequest.of(escala.getDias())).build();
+    }
 }

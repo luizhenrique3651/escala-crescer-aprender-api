@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -62,6 +63,7 @@ public class EscalaService {
 
 
     // novo: salvar a partir de request DTO (recomendado para endpoints)
+    @Transactional
     public Escala saveFromRequest(EscalaCreateRequest request) {
         Escala escala = new Escala();
         escala.setMes(request.getMes());
@@ -75,7 +77,9 @@ public class EscalaService {
         return repository.save(escala);
     }
 
+    @Transactional
     public Escala update(Long id, Escala escala) {
+        log.info("Iniciando atualização da Escala ={}", escala);
         Escala oldEscala = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Escala", id));
 
         Optional.ofNullable(escala.getAno()).ifPresent(oldEscala::setAno);
@@ -84,32 +88,32 @@ public class EscalaService {
             mergeDatas(oldEscala, dates);
             // após mesclar as datas, recria os dias conforme disponibilidades
             List<EscalaDia> diasRecriados = new ArrayList<>();
-            Set<Voluntario> voluntariosUnion = new LinkedHashSet<>();
             for (LocalDate data : oldEscala.getDatas()) {
-                Optional<List<Voluntario>> listaVoluntariosNaData = voluntarioRepository.findVoluntariosByData(data);
-                if (listaVoluntariosNaData.isEmpty() || listaVoluntariosNaData.get().size() < 4) {
-                    throw new InvalidVoluntarioDataException("Menos de 4 voluntários disponíveis para a data: " + data);
+                List<Voluntario> listaVoluntariosNaData = voluntarioRepository.findVoluntariosByData(data).orElse(Collections.emptyList());
+                if (listaVoluntariosNaData.isEmpty() || listaVoluntariosNaData.size() < 4) {
+                    log.warn("Menos de 4 voluntários disponíveis para a data: {}", data);
                 }
-                List<Voluntario> candidatos = new ArrayList<>(listaVoluntariosNaData.get());
+                List<Voluntario> candidatos = new ArrayList<>(listaVoluntariosNaData);
                 Collections.shuffle(candidatos);
                 int seleciona = Math.min(8, candidatos.size());
                 List<Voluntario> selecionados = new ArrayList<>(candidatos.subList(0, seleciona));
 
                 EscalaDia dia = EscalaDia.builder().data(data).voluntarios(selecionados).build();
                 diasRecriados.add(dia);
-                voluntariosUnion.addAll(selecionados);
             }
             diasRecriados.forEach(d -> d.setEscala(oldEscala));
-            if (escala.getDias() != null) {
-                oldEscala.getDias().clear();
-            } else {
+            // mantém a mesma instância de coleção gerenciada pelo JPA para evitar problemas com orphanRemoval
+            if (oldEscala.getDias() == null) {
                 oldEscala.setDias(new ArrayList<>());
+            } else {
+                oldEscala.getDias().clear();
             }
             oldEscala.getDias().addAll(diasRecriados);
 
             // removido campo legado escala.voluntarios; a alocação fica em oldEscala.dias
         });
         // antigo suporte a mergeVoluntarios removido; use apenas escala.dias para atualizar alocações por dia
+        log.info("Finalizando atualização da Escala ={}", escala);
         return repository.save(oldEscala);
     }
 
@@ -122,6 +126,14 @@ public class EscalaService {
         }
     }
 
+    @Transactional
+    public Escala populaEscalaComVoluntarios(Long idEscala){
+        // carregar a instância gerenciada e modificá-la diretamente para evitar conflitos de coleção (orphanRemoval)
+        Escala escala = repository.findById(idEscala).orElseThrow(() -> new EntityNotFoundException("Escala", idEscala));
+        populaEscalaComDias(escala, EscalaCreateRequest.of(escala));
+        // Como estamos em uma transação, simplesmente salvar a entidade gerenciada mantém a integridade das coleções
+        return repository.save(escala);
+    }
 
     private void mergeDatas(Escala escala, List<LocalDate> novasDatas) {
         List<LocalDate> datasAtuais = escala.getDatas();
@@ -149,29 +161,42 @@ public class EscalaService {
     }
 
     private void populaEscalaComDias(Escala escala, EscalaCreateRequest request) {
+        log.info("Iniciando população da escala com dias e voluntários... | Escala ={}", escala);
         // Metodo que verifica se a request foram passados dias completos com voluntários
         List<EscalaDia> dias = new ArrayList<>();
         if (request.getDias() != null && !request.getDias().isEmpty()) {
             for (EscalaDiaRequest diaRequest : request.getDias()) {
+                log.info("Processando EscalaDiaRequest para data = {}", diaRequest.getData());
                 EscalaDia escalaDia = new EscalaDia();
                 escalaDia.setData(diaRequest.getData());
                 if (diaRequest.getVoluntarios() != null && !diaRequest.getVoluntarios().isEmpty()) {
+                    log.info("Processando Voluntarios para data = {}", diaRequest.getVoluntarios());
                     // busca por ids
                     Optional<List<Voluntario>> voluntariosNoBanco = voluntarioRepository.findVoluntariosByIds(diaRequest.getVoluntarios());
                     if (voluntariosNoBanco.isPresent()) {
                         validaVoluntariosExistentes(diaRequest, voluntariosNoBanco);
                         validaDisponibilidadeVoluntarios(diaRequest, voluntariosNoBanco);
+                        log.info("Validando voluntarios para data = {}", diaRequest.getVoluntarios());
                         escalaDia.setVoluntarios(voluntariosNoBanco.get());
+                        log.info("Voluntarios atribuídos para data = {}", diaRequest.getData());
 
                     }
                 } else {
                     // se não passou ids, deixa que o método de persistência selecione baseado em disponibilidade
+                    log.info("Request não possui voluntários específicos para a data ={}. Selecionando aleatoriamente entre os disponíveis.", diaRequest.getData());
                     escalaVoluntariosAleatoriosDisponiveis(diaRequest, escalaDia);
+                    log.info("Voluntarios aleatórios atribuídos para data = {}", diaRequest.getData());
                 }
                 dias.add(escalaDia);
             }
             dias.forEach(d -> d.setEscala(escala));
-            escala.setDias(dias);
+            // ao invés de substituir a coleção gerenciada pelo JPA, muta a instância existente para evitar problemas com orphanRemoval
+            if (escala.getDias() == null) {
+                escala.setDias(new ArrayList<>());
+            } else {
+                escala.getDias().clear();
+            }
+            escala.getDias().addAll(dias);
         } else {
             criaDiasComVoluntariosDisponiveis(escala);
         }
@@ -193,7 +218,8 @@ public class EscalaService {
     private static void validaDisponibilidadeVoluntarios(EscalaDiaRequest diaRequest, Optional<List<Voluntario>> voluntariosNoBanco) {
         log.info("Verificando se todos voluntários passados para o EscalaDiaRequest : {} estão de fato disponíveis para o dia.", diaRequest.getData());
         // valida disponibilidade: cada voluntario especificado deve conter a data em datasDisponiveis
-        List<Long> notAvailable = voluntariosNoBanco.get().stream().filter(v -> v.getDatasDisponiveis() == null || !v.getDatasDisponiveis().contains(diaRequest.getData())).map(Voluntario::getId).toList();
+        List<Voluntario> voluntariosList = voluntariosNoBanco.orElse(Collections.emptyList());
+        List<Long> notAvailable = voluntariosList.stream().filter(v -> v.getDatasDisponiveis() == null || !v.getDatasDisponiveis().contains(diaRequest.getData())).map(Voluntario::getId).toList();
         if (!notAvailable.isEmpty()) {
             throw new InvalidVoluntarioDataException("Voluntários não disponíveis para a data " + diaRequest.getData() + ": " + notAvailable);
         }
@@ -201,11 +227,16 @@ public class EscalaService {
     }
 
     private void escalaVoluntariosAleatoriosDisponiveis(EscalaDiaRequest diaRequest, EscalaDia escalaDia) {
-        Optional<List<Voluntario>> candidatos = voluntarioRepository.findVoluntariosByData(diaRequest.getData());
-        if (candidatos.isEmpty() || candidatos.get().size() < 4) {
-            log.warn("Poucos voluntários para o dia = {}", diaRequest.getData(), new InvalidVoluntarioDataException("Menos de 4 voluntários disponíveis para a data: " + diaRequest.getData()));
+        List<Voluntario> candidatos = voluntarioRepository.findVoluntariosByData(diaRequest.getData()).orElse(Collections.emptyList());
+        if (candidatos.isEmpty()) {
+            InvalidVoluntarioDataException e = new InvalidVoluntarioDataException("Não há voluntarios disponíveis para a data =" + diaRequest.getData());
+            log.error(e.getMessage());
+            throw e;
         }
-        List<Voluntario> voluntariosCandidatos = new ArrayList<>(candidatos.get());
+        if (candidatos.size() < 4) {
+            log.warn("Poucos voluntários para o dia = {}", diaRequest.getData());
+        }
+        List<Voluntario> voluntariosCandidatos = new ArrayList<>(candidatos);
         Collections.shuffle(voluntariosCandidatos);
         int seleciona = Math.min(8, voluntariosCandidatos.size());
         List<Voluntario> selecionados = new ArrayList<>(voluntariosCandidatos.subList(0, seleciona));
@@ -219,11 +250,10 @@ public class EscalaService {
             throw new InvalidVoluntarioDataException("A escala deve conter pelo menos uma data.");
         }
         for (LocalDate data : escala.getDatas()) {
-            Optional<List<Voluntario>> candidatosOpt = voluntarioRepository.findVoluntariosByData(data);
-            if (candidatosOpt.isEmpty() || candidatosOpt.get().size() < 4) {
+            List<Voluntario> candidatos = new ArrayList<>(voluntarioRepository.findVoluntariosByData(data).orElse(Collections.emptyList()));
+            if (candidatos.isEmpty() || candidatos.size() < 4) {
                 log.warn("Dia gerado com poucos voluntários disponíveis para serem escalados | dia ={} ", data, new InvalidVoluntarioDataException("Menos de 4 voluntários disponíveis para a data: " + data));
             }
-            List<Voluntario> candidatos = new ArrayList<>(candidatosOpt.get());
             Collections.shuffle(candidatos);
             int seleciona = Math.min(8, candidatos.size());
             List<Voluntario> selecionados = new ArrayList<>(candidatos.subList(0, seleciona));
@@ -234,6 +264,12 @@ public class EscalaService {
             diasGerados.add(dia);
         }
         diasGerados.forEach(d -> d.setEscala(escala));
-        escala.setDias(diasGerados);
+        // ao invés de substituir a coleção gerenciada pelo JPA, muta a instância existente para evitar problemas com orphanRemoval
+        if (escala.getDias() == null) {
+            escala.setDias(new ArrayList<>());
+        } else {
+            escala.getDias().clear();
+        }
+        escala.getDias().addAll(diasGerados);
     }
 }
