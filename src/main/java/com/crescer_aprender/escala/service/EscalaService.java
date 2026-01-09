@@ -72,8 +72,9 @@ public class EscalaService {
 
         verificaSeHaEscalaCadastradaNaData(escala);
 
-        populaEscalaComDias(escala, request);
-
+        if(request.getIncluirVoluntariosAutomaticamente()) {
+            populaEscalaComDias(escala, request);
+        }
         return repository.save(escala);
     }
 
@@ -84,6 +85,14 @@ public class EscalaService {
 
         Optional.ofNullable(escala.getAno()).ifPresent(oldEscala::setAno);
         Optional.ofNullable(escala.getMes()).ifPresent(oldEscala::setMes);
+        recriaDiasParaUpdate(oldEscala, escala);
+
+        // antigo suporte a mergeVoluntarios removido; use apenas escala.dias para atualizar alocações por dia
+        log.info("Finalizando atualização da Escala ={}", escala);
+        return repository.save(oldEscala);
+    }
+
+    public void recriaDiasParaUpdate(Escala oldEscala, Escala escala){
         Optional.ofNullable(escala.getDatas()).ifPresent(dates -> {
             mergeDatas(oldEscala, dates);
             // após mesclar as datas, recria os dias conforme disponibilidades
@@ -112,11 +121,7 @@ public class EscalaService {
 
             // removido campo legado escala.voluntarios; a alocação fica em oldEscala.dias
         });
-        // antigo suporte a mergeVoluntarios removido; use apenas escala.dias para atualizar alocações por dia
-        log.info("Finalizando atualização da Escala ={}", escala);
-        return repository.save(oldEscala);
     }
-
     public boolean delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
