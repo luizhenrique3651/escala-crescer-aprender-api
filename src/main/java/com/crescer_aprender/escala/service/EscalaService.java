@@ -72,7 +72,7 @@ public class EscalaService {
 
         verificaSeHaEscalaCadastradaNaData(escala);
 
-        if(request.getIncluirVoluntariosAutomaticamente()) {
+        if (request.getIncluirVoluntariosAutomaticamente() != null && request.getIncluirVoluntariosAutomaticamente()) {
             populaEscalaComDias(escala, request);
         }
         return repository.save(escala);
@@ -92,7 +92,7 @@ public class EscalaService {
         return repository.save(oldEscala);
     }
 
-    public void recriaDiasParaUpdate(Escala oldEscala, Escala escala){
+    public void recriaDiasParaUpdate(Escala oldEscala, Escala escala) {
         Optional.ofNullable(escala.getDatas()).ifPresent(dates -> {
             mergeDatas(oldEscala, dates);
             // após mesclar as datas, recria os dias conforme disponibilidades
@@ -122,6 +122,7 @@ public class EscalaService {
             // removido campo legado escala.voluntarios; a alocação fica em oldEscala.dias
         });
     }
+
     public boolean delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
@@ -132,7 +133,7 @@ public class EscalaService {
     }
 
     @Transactional
-    public Escala populaEscalaComVoluntarios(Long idEscala){
+    public Escala populaEscalaComVoluntarios(Long idEscala) {
         // carregar a instância gerenciada e modificá-la diretamente para evitar conflitos de coleção (orphanRemoval)
         Escala escala = repository.findById(idEscala).orElseThrow(() -> new EntityNotFoundException("Escala", idEscala));
         populaEscalaComDias(escala, EscalaCreateRequest.of(escala));
