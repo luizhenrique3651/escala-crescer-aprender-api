@@ -92,6 +92,7 @@ paths:
               dias:
                 - data: '2025-12-07'
                   voluntarios: [1, 2]
+              incluirVoluntariosAutomaticamente: true
       responses:
         '200':
           description: Escala criada
@@ -702,6 +703,10 @@ components:
           items:
             $ref: '#/components/schemas/EscalaDiaRequest'
           description: Lista opcional de dias com ids de voluntários por dia. Se omitido, o serviço seleciona automaticamente com base na disponibilidade.
+        incluirVoluntariosAutomaticamente:
+          type: boolean
+          description: Indica se a escala deve ser populada automaticamente com voluntários onde não houver alocação(cria dias a partir das datas passadas, esses dias possuem a data e os voluntários escalados para essa aula). Se omitido o comportamento padrão do serviço é usado (geralmente true).
+          example: true
 
     EscalaDiaRequest:
       type: object
