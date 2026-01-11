@@ -20,7 +20,7 @@ public class EscalaCreateRequest {
     // opcional: lista de dias com IDs de voluntarios por dia
     List<EscalaDiaRequest> dias;
     // o campo legado 'voluntarios' foi removido - favor usar 'dias[].voluntarios' ou omitir para seleção automática
-
+    Boolean incluirVoluntariosAutomaticamente;
     public static EscalaCreateRequest of(Escala escala){
         return EscalaCreateRequest.builder()
                 .mes(escala.getMes())

@@ -72,8 +72,9 @@ public class EscalaService {
 
         verificaSeHaEscalaCadastradaNaData(escala);
 
-        populaEscalaComDias(escala, request);
-
+        if (request.getIncluirVoluntariosAutomaticamente() != null && request.getIncluirVoluntariosAutomaticamente()) {
+            populaEscalaComDias(escala, request);
+        }
         return repository.save(escala);
     }
 
@@ -84,6 +85,14 @@ public class EscalaService {
 
         Optional.ofNullable(escala.getAno()).ifPresent(oldEscala::setAno);
         Optional.ofNullable(escala.getMes()).ifPresent(oldEscala::setMes);
+        recriaDiasParaUpdate(oldEscala, escala);
+
+        // antigo suporte a mergeVoluntarios removido; use apenas escala.dias para atualizar alocações por dia
+        log.info("Finalizando atualização da Escala ={}", escala);
+        return repository.save(oldEscala);
+    }
+
+    public void recriaDiasParaUpdate(Escala oldEscala, Escala escala) {
         Optional.ofNullable(escala.getDatas()).ifPresent(dates -> {
             mergeDatas(oldEscala, dates);
             // após mesclar as datas, recria os dias conforme disponibilidades
@@ -112,9 +121,6 @@ public class EscalaService {
 
             // removido campo legado escala.voluntarios; a alocação fica em oldEscala.dias
         });
-        // antigo suporte a mergeVoluntarios removido; use apenas escala.dias para atualizar alocações por dia
-        log.info("Finalizando atualização da Escala ={}", escala);
-        return repository.save(oldEscala);
     }
 
     public boolean delete(Long id) {
@@ -127,7 +133,7 @@ public class EscalaService {
     }
 
     @Transactional
-    public Escala populaEscalaComVoluntarios(Long idEscala){
+    public Escala populaEscalaComVoluntarios(Long idEscala) {
         // carregar a instância gerenciada e modificá-la diretamente para evitar conflitos de coleção (orphanRemoval)
         Escala escala = repository.findById(idEscala).orElseThrow(() -> new EntityNotFoundException("Escala", idEscala));
         populaEscalaComDias(escala, EscalaCreateRequest.of(escala));
@@ -165,6 +171,7 @@ public class EscalaService {
         // Metodo que verifica se a request foram passados dias completos com voluntários
         List<EscalaDia> dias = new ArrayList<>();
         if (request.getDias() != null && !request.getDias().isEmpty()) {
+            log.info("Percorrendo dias passados pela request, para maepar em EscalaDia e adicionar os voluntários...");
             for (EscalaDiaRequest diaRequest : request.getDias()) {
                 log.info("Processando EscalaDiaRequest para data = {}", diaRequest.getData());
                 EscalaDia escalaDia = new EscalaDia();
@@ -174,11 +181,11 @@ public class EscalaService {
                     // busca por ids
                     Optional<List<Voluntario>> voluntariosNoBanco = voluntarioRepository.findVoluntariosByIds(diaRequest.getVoluntarios());
                     if (voluntariosNoBanco.isPresent()) {
+                        log.info("Validando voluntarios para data = {}", diaRequest.getVoluntarios());
                         validaVoluntariosExistentes(diaRequest, voluntariosNoBanco);
                         validaDisponibilidadeVoluntarios(diaRequest, voluntariosNoBanco);
-                        log.info("Validando voluntarios para data = {}", diaRequest.getVoluntarios());
                         escalaDia.setVoluntarios(voluntariosNoBanco.get());
-                        log.info("Voluntarios atribuídos para data = {}", diaRequest.getData());
+                        log.info("Voluntarios validados e atribuídos para data = {}", diaRequest.getData());
 
                     }
                 } else {

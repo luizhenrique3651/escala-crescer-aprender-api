@@ -148,7 +148,7 @@ class EscalaServiceTest {
     void testSave_SemVoluntariosAdicionaDisponiveis() {
         EscalaCreateRequest escala = criaEscalaRequestExemplo();
         // não usar mais campo legado de voluntarios; o serviço gerará `dias` automaticamente
-
+        escala.setIncluirVoluntariosAutomaticamente(Boolean.TRUE);
         // criar 4 voluntários para cada data (mínimo exigido)
         List<Voluntario> voluntariosData1 = Arrays.asList(
                 criaVoluntarioExemplo(1L, LocalDate.of(2025,7,5)),
@@ -276,7 +276,7 @@ class EscalaServiceTest {
     @Test
     void testSave_VoluntariosAusentes_DeveLogarException() {
         EscalaCreateRequest escala = criaEscalaRequestExemplo();
-
+        escala.setIncluirVoluntariosAutomaticamente(Boolean.TRUE);
         List<Voluntario> voluntariosData1 = Arrays.asList(criaVoluntarioExemplo(1L));
         List<Voluntario> voluntariosData2 = Arrays.asList(criaVoluntarioExemplo(2L));
 
