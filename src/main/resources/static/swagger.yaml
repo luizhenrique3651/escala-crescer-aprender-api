@@ -16,7 +16,7 @@ info:
   version: 1.0.12
 tags:
   - name: Autenticação
-  - description: Operações de Autenticação
+    description: Operações de Autenticação
   - name: Escala
     description: Operações de Escala
   - name: Voluntario
@@ -76,7 +76,7 @@ paths:
         - Escala
       summary: Cadastra uma nova Escala
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -91,7 +91,7 @@ paths:
                 - '2025-12-14'
               dias:
                 - data: '2025-12-07'
-                  voluntarios: [1, 2]
+                  voluntarios: [ 1, 2 ]
               incluirVoluntariosAutomaticamente: true
       responses:
         '200':
@@ -159,7 +159,7 @@ paths:
         - Escala
       summary: Atualiza uma Escala existente
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -193,7 +193,7 @@ paths:
         - Escala
       summary: Remove uma Escala
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -224,7 +224,7 @@ paths:
         Observação: no controller atual o método está mapeado com `@PutMapping("/popula-voluntarios/{idEscala}")` mas o parâmetro do método usa `@RequestHeader`.
         Isso é inconsistente com a presença de `{idEscala}` na URL — o parâmetro deveria ser `@PathVariable Long idEscala` para funcionar como esperado.
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: idEscala
           in: path
@@ -475,7 +475,7 @@ paths:
         - Voluntario
       summary: Cadastra um novo voluntário
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -530,7 +530,7 @@ paths:
         - Voluntario
       summary: Remove um voluntário
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -555,7 +555,7 @@ paths:
         - Autenticação
       summary: Lista todos os usuários (requer COORDENADOR)
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Lista de usuários
@@ -579,7 +579,7 @@ paths:
         - Autenticação
       summary: Cadastra um novo usuário junto com um Voluntário (requer COORDENADOR)
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -774,4 +774,4 @@ components:
           type: string
 
 security:
-  - bearerAuth: []
+  - bearerAuth: [ ]
