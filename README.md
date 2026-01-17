@@ -176,7 +176,7 @@ Este projeto é **open source** e colaborações são muito bem-vindas! Para con
 
 ## 📝 Possíveis Melhorias Futuras
 
-- Adicionar filtros de busca por nome e e-mail de voluntário
+- Adicionar paginação e ordenação em *todas* consultas
 - Criar testes de integração que validem fluxos de autenticação e autorização
 
 ---

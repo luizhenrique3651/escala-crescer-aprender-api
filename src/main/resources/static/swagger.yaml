@@ -16,7 +16,7 @@ info:
   version: 1.0.12
 tags:
   - name: Autenticação
-  - description: Operações de Autenticação
+    description: Operações de Autenticação
   - name: Escala
     description: Operações de Escala
   - name: Voluntario
@@ -76,13 +76,23 @@ paths:
         - Escala
       summary: Cadastra uma nova Escala
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Escala'
+              $ref: '#/components/schemas/EscalaCreateRequest'
+            example:
+              mes: 12
+              ano: 2025
+              datas:
+                - '2025-12-07'
+                - '2025-12-14'
+              dias:
+                - data: '2025-12-07'
+                  voluntarios: [ 1, 2 ]
+              incluirVoluntariosAutomaticamente: true
       responses:
         '200':
           description: Escala criada
@@ -149,7 +159,7 @@ paths:
         - Escala
       summary: Atualiza uma Escala existente
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -183,7 +193,7 @@ paths:
         - Escala
       summary: Remove uma Escala
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -197,6 +207,42 @@ paths:
           description: Escala não encontrada
         '403':
           description: Acesso negado — usuário autenticado sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /crescer-aprender/escala/popula-voluntarios/{idEscala}:
+    put:
+      tags:
+        - Escala
+      summary: Popula uma escala existente com voluntários (preenche os dias com voluntários disponíveis)
+      description: >-
+        Popula a escala identificada por `idEscala` com voluntários disponíveis para as datas já criadas na escala. O endpoint delega à lógica de serviço
+        a seleção automática dos voluntários por data.
+        
+        Observação: no controller atual o método está mapeado com `@PutMapping("/popula-voluntarios/{idEscala}")` mas o parâmetro do método usa `@RequestHeader`.
+        Isso é inconsistente com a presença de `{idEscala}` na URL — o parâmetro deveria ser `@PathVariable Long idEscala` para funcionar como esperado.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: idEscala
+          in: path
+          description: ID da escala a ser populada com voluntários
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Escala populada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escala'
+        '404':
+          description: Escala não encontrada
+        '500':
+          description: Erro interno ao popular escala (ver mensagem no campo `errorMessage` do corpo quando aplicável)
           content:
             application/json:
               schema:
@@ -323,84 +369,6 @@ paths:
                 $ref: '#/components/schemas/PaginatedEscala'
         '204':
           description: Nenhuma escala encontrada
-
-  /crescer-aprender/escala/pesquisa-legado:
-    get:
-      tags:
-        - Escala
-      summary: Busca dinâmica (não-paginada) por query params — compatibilidade
-      description: >-
-        Retorna uma lista simples de `Escala` baseada nos pares chave=valor passados via query string. Chaves suportadas: id, mes, ano, data (yyyy-MM-dd), voluntarioId.
-      parameters:
-        - name: id
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: mes
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: ano
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: data
-          in: query
-          required: false
-          schema:
-            type: string
-            format: date
-            example: '2025-05-12'
-        - name: voluntarioId
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Lista de escalas que atendem aos filtros
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Escala'
-        '204':
-          description: Nenhuma escala encontrada
-
-    post:
-      tags:
-        - Escala
-      summary: Busca dinâmica (não-paginada) por body JSON — compatibilidade
-      description: >-
-        Envia um objeto JSON com chaves e valores (todos strings) para filtrar e recebe lista simples como resposta.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties:
-                type: string
-              example:
-                mes: "5"
-                ano: "2025"
-                voluntarioId: "3"
-      responses:
-        '200':
-          description: Lista de escalas que atendem aos filtros
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Escala'
-        '204':
-          description: Nenhuma escala encontrada
-
   /crescer-aprender/voluntarios:
     get:
       tags:
@@ -429,7 +397,7 @@ paths:
         - Voluntario
       summary: Cadastra um novo voluntário
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -484,7 +452,7 @@ paths:
         - Voluntario
       summary: Remove um voluntário
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -509,7 +477,7 @@ paths:
         - Autenticação
       summary: Lista todos os usuários (requer COORDENADOR)
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Lista de usuários
@@ -533,7 +501,7 @@ paths:
         - Autenticação
       summary: Cadastra um novo usuário junto com um Voluntário (requer COORDENADOR)
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -592,6 +560,11 @@ components:
         - voluntarios
       type: object
       properties:
+        id:
+          type: integer
+          example: 1
+          description: Id da escala
+
         mes:
           type: integer
           example: 7
@@ -606,14 +579,68 @@ components:
           items:
             type: string
             format: date
-        voluntarios:
+        dias:
           type: array
-          description: Voluntários da escala
+          description: Lista de dias da escala com voluntários alocados (cada dia tem 4-8 voluntários)
           items:
-            $ref: '#/components/schemas/Voluntario'
+            $ref: '#/components/schemas/EscalaDia'
         errorMessage:
           type: string
           example: 'Erro ao salvar escala'
+
+    EscalaDia:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date
+          description: Data do dia na escala
+        voluntarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Voluntario'
+          description: Voluntários escalados para essa data (4..8)
+      description: Representa a alocação de voluntários por dia dentro de uma `Escala`
+
+    EscalaCreateRequest:
+      type: object
+      required:
+        - mes
+        - ano
+        - datas
+      properties:
+        mes:
+          type: integer
+          example: 12
+        ano:
+          type: integer
+          example: 2025
+        datas:
+          type: array
+          items:
+            type: string
+            format: date
+        dias:
+          type: array
+          items:
+            $ref: '#/components/schemas/EscalaDiaRequest'
+          description: Lista opcional de dias com ids de voluntários por dia. Se omitido, o serviço seleciona automaticamente com base na disponibilidade.
+        incluirVoluntariosAutomaticamente:
+          type: boolean
+          description: Indica se a escala deve ser populada automaticamente com voluntários onde não houver alocação(cria dias a partir das datas passadas, esses dias possuem a data e os voluntários escalados para essa aula). Se omitido o comportamento padrão do serviço é usado (geralmente true).
+          example: true
+
+    EscalaDiaRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date
+        voluntarios:
+          type: array
+          items:
+            type: integer
+          description: Lista de IDs de voluntários para essa data
 
     Usuario:
       required:
@@ -669,4 +696,4 @@ components:
           type: string
 
 security:
-  - bearerAuth: []
+  - bearerAuth: [ ]

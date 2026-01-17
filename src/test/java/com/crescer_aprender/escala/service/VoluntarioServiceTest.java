@@ -90,7 +90,7 @@ public class VoluntarioServiceTest {
             voluntarioService.save(voluntario);
         });
 
-        assertEquals("O nome do voluntário é obrigatório.", e.getMessage());
+        assertTrue( e.getMessage().contains("O nome do voluntário é obrigatório."));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class VoluntarioServiceTest {
     @Test
     void delete_Sucesso() {
         when(voluntarioRepository.existsById(1L)).thenReturn(true);
-        when(escalaRepository.existsByVoluntarios(any())).thenReturn(false);
+        when(escalaRepository.existsByVoluntarioId(anyLong())).thenReturn(false);
         doNothing().when(voluntarioRepository).deleteById(1L);
 
         assertTrue(voluntarioService.delete(1L));
@@ -159,14 +159,13 @@ public class VoluntarioServiceTest {
     @Test
     void delete_FalhaVoluntarioEmEscala() {
         when(voluntarioRepository.existsById(1L)).thenReturn(true);
-        when(escalaRepository.existsByVoluntarios(any())).thenReturn(true);
+        when(escalaRepository.existsByVoluntarioId(anyLong())).thenReturn(true);
 
         VoluntarioIsScheduledException e = assertThrows(VoluntarioIsScheduledException.class, () -> {
             voluntarioService.delete(1L);
         });
 
-        assertEquals("Voluntário não pode ser deletado pois está escalado", e.getMessage());
-    }
+        assertTrue(e.getMessage().contains("Voluntário não pode ser deletado pois está escalado"));  }
 
     @Test
     void delete_FalhaVoluntarioNaoEncontrado() {

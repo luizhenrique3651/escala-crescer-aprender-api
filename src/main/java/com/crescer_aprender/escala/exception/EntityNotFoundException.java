@@ -1,11 +1,14 @@
 package com.crescer_aprender.escala.exception;
 
-public class EntityNotFoundException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class EntityNotFoundException extends ResponseStatusException {
     public EntityNotFoundException(String entity, Long id) {
-        super(String.format(ConstantExceptionUtil.ENTITY_NOT_FOUND, entity, id));
+        super(HttpStatus.NOT_FOUND, String.format(ConstantExceptionUtil.ENTITY_NOT_FOUND, entity, id));
     }
 
     public EntityNotFoundException(String message) {
-        super(message);
+        super(HttpStatus.NOT_FOUND, message);
     }
 }

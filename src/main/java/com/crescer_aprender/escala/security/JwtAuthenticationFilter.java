@@ -15,6 +15,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -35,7 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String username;
 
+        log.debug("Processando autenticação JWT para path={}", request.getRequestURI());
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.debug("Cabeçalho Authorization ausente ou inválido");
             filterChain.doFilter(request, response);
             return;
         }
@@ -43,7 +49,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         try {
             username = jwtService.extractUsername(jwt);
+            log.debug("Username extraído do token JWT: {}", username);
         } catch (Exception e) {
+            log.warn("Token JWT inválido/expirado: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token incorreto");
             return;
@@ -56,6 +64,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                log.debug("Autenticação populada no contexto para username={}", username);
+            } else {
+                log.warn("Token JWT não é válido para o usuário={}", username);
             }
         }
         filterChain.doFilter(request, response);

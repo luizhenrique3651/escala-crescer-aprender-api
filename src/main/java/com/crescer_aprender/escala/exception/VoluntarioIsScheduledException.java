@@ -1,7 +1,10 @@
 package com.crescer_aprender.escala.exception;
 
-public class VoluntarioIsScheduledException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class VoluntarioIsScheduledException extends ResponseStatusException {
     public VoluntarioIsScheduledException() {
-        super("Voluntário não pode ser deletado pois está escalado");
+        super(HttpStatus.BAD_REQUEST, "Voluntário não pode ser deletado pois está escalado");
     }
 }

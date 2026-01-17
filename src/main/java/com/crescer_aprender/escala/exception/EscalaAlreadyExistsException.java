@@ -1,7 +1,10 @@
 package com.crescer_aprender.escala.exception;
 
-public class EscalaAlreadyExistsException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class EscalaAlreadyExistsException extends ResponseStatusException {
     public EscalaAlreadyExistsException(Long ano, Integer mes){
-        super(String.format(ConstantExceptionUtil.ESCALA_ALREADY_EXISTS, mes, ano));
+        super(HttpStatus.BAD_REQUEST, String.format(ConstantExceptionUtil.ESCALA_ALREADY_EXISTS, mes, ano));
     }
 }
