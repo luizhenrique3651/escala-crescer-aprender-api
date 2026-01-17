@@ -6,9 +6,8 @@
         .title { font: bold 16px sans-serif; fill: #2d3748; }
         .label { font: 13px sans-serif; fill: #2d3748; }
         .small { font: 11px sans-serif; fill: #4a5568; }
-        /* Corrigido: tornar as setas não preenchidas e com ponta arredondada para edição mais fácil */
-        .arrow { stroke: #2d3748; stroke-width: 2; fill: none; stroke-linecap: round; marker-end: url(#arrowhead); }
-        </style>
+        .arrow { stroke: #2d3748; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
 
     <defs>
         <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
@@ -34,21 +33,14 @@
     <text x="150" y="160" class="title">Escala API (Spring Boot)</text>
 
     <!-- Controller -->
-    <rect x="170" y="190" width="220" height="150" class="box"/>
+    <rect x="170" y="190" width="220" height="90" class="box"/>
     <text x="190" y="215" class="title">Controller</text>
-    <text x="190" y="240" class="small">Endpoints REST, mapeamento</text>
-    <text x="190" y="260" class="small">- EscalaController</text>
-    <text x="190" y="275" class="small">- VoluntarioController</text>
-    <text x="190" y="290" class="small">- UsuarioController</text>
-    <text x="190" y="305" class="small">- AuthController</text>
+    <text x="190" y="235" class="small">Endpoints REST, mapeamento</text>
 
     <!-- Service -->
-    <rect x="430" y="190" width="240" height="150" class="box"/>
+    <rect x="430" y="190" width="240" height="90" class="box"/>
     <text x="460" y="215" class="title">Serviço</text>
-    <text x="460" y="240" class="small">Lógica de negócio, validações, transações</text>
-    <text x="460" y="260" class="small">- EscalaService</text>
-    <text x="460" y="275" class="small">- VoluntarioService</text>
-    <text x="460" y="290" class="small">- UsuarioService</text>
+    <text x="460" y="235" class="small">Lógica de negócio, validações, transações</text>
 
     <!-- Specifications -->
     <rect x="720" y="190" width="220" height="90" class="box"/>
@@ -56,12 +48,9 @@
     <text x="750" y="235" class="small">Constrói predicados JPA Criteria</text>
 
     <!-- Repository -->
-    <rect x="430" y="310" width="240" height="130" class="box"/>
+    <rect x="430" y="310" width="240" height="90" class="box"/>
     <text x="460" y="335" class="title">Repositório</text>
     <text x="460" y="355" class="small">JpaRepository + JpaSpecificationExecutor</text>
-    <text x="460" y="375" class="small">- EscalaRepository</text>
-    <text x="460" y="390" class="small">- VoluntarioRepository</text>
-    <text x="460" y="405" class="small">- UsuarioRepository</text>
 
     <!-- Banco de dados -->
     <rect x="720" y="310" width="220" height="90" class="box"/>
@@ -86,45 +75,32 @@
     <text x="380" y="565" class="small">Docker + docker-compose</text>
     <text x="380" y="585" class="small">Contêineres: API e PostgreSQL</text>
 
-    <!-- Setas: Cliente → Swagger → Controller (convertidas para linhas com ids para fácil seleção) -->
-    <path id="arrow-client-swagger" class="arrow" d="M 300 65 L 340 65" />
-    <path id="arrow-client-swagger-hit" class="arrow-hit" d="M 300 65 L 340 65" />
-    <path id="arrow-swagger-gateway" class="arrow" d="M 600 65 L 640 65" />
-    <path id="arrow-swagger-gateway-hit" class="arrow-hit" d="M 600 65 L 640 65" />
-    <path id="arrow-gateway-app" class="arrow" d="M 700 100 L 700 140" />
-    <path id="arrow-gateway-app-hit" class="arrow-hit" d="M 700 100 L 700 140" />
+    <!-- Setas: Cliente → Swagger → Controller -->
+    <path class="arrow" d="M300 65 L340 65" />
+    <path class="arrow" d="M600 65 L640 65" />
+    <path class="arrow" d="M700 100 L700 140" />
 
     <!-- Setas de Cliente e Swagger para Controller -->
-    <path id="arrow-client-controller" class="arrow" d="M 170 100 L 260 180" />
-    <path id="arrow-client-controller-hit" class="arrow-hit" d="M 170 100 L 260 180" />
-    <path id="arrow-swagger-controller" class="arrow" d="M 470 100 L 450 180" />
-    <path id="arrow-swagger-controller-hit" class="arrow-hit" d="M 470 100 L 450 180" />
+    <path class="arrow" d="M170 100 L260 180" />
+    <path class="arrow" d="M470 100 L450 180" />
 
     <!-- Controller → Serviço -->
-    <path id="arrow-controller-service" class="arrow" d="M 390 235 L 430 235" />
-    <path id="arrow-controller-service-hit" class="arrow-hit" d="M 390 235 L 430 235" />
+    <path class="arrow" d="M390 235 L430 235" />
 
     <!-- Serviço → Specifications, Repositório e Segurança -->
-    <path id="arrow-service-specs" class="arrow" d="M 670 235 L 720 235" />
-    <path id="arrow-service-specs-hit" class="arrow-hit" d="M 670 235 L 720 235" />
-    <path id="arrow-service-repo" class="arrow" d="M 560 280 L 560 310" />
-    <path id="arrow-service-repo-hit" class="arrow-hit" d="M 560 280 L 560 310" />
-    <path id="arrow-service-security" class="arrow" d="M 320 280 L 320 310" />
-    <path id="arrow-service-security-hit" class="arrow-hit" d="M 320 280 L 320 310" />
+    <path class="arrow" d="M670 235 L720 235" />
+    <path class="arrow" d="M560 280 L560 310" />
+    <path class="arrow" d="M320 280 L320 310" />
 
     <!-- Repositório → Banco -->
-    <path id="arrow-repo-db" class="arrow" d="M 670 355 L 720 355" />
-    <path id="arrow-repo-db-hit" class="arrow-hit" d="M 670 355 L 720 355" />
+    <path class="arrow" d="M670 355 L720 355" />
 
     <!-- Segurança (checks) -->
-    <path id="arrow-security-checks" class="arrow" d="M 230 280 L 230 310" />
-    <path id="arrow-security-checks-hit" class="arrow-hit" d="M 230 280 L 230 310" />
+    <path class="arrow" d="M230 280 L230 310" />
 
     <!-- CI / Docker → Aplicação -->
-    <path id="arrow-ci-app-1" class="arrow" d="M 210 520 L 210 400" />
-    <path id="arrow-ci-app-1-hit" class="arrow-hit" d="M 210 520 L 210 400" />
-    <path id="arrow-ci-app-2" class="arrow" d="M 510 520 L 510 400" />
-    <path id="arrow-ci-app-2-hit" class="arrow-hit" d="M 510 520 L 510 400" />
+    <path class="arrow" d="M210 520 L210 400" />
+    <path class="arrow" d="M510 520 L510 400" />
 
     <!-- Legenda -->
     <rect x="980" y="520" width="200" height="120" class="box-muted"/>

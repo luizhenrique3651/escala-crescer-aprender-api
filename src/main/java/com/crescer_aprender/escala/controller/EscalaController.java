@@ -121,20 +121,6 @@ public class EscalaController {
         return ResponseEntity.ok(results);
     }
 
-    // endpoints não paginados
-    @GetMapping("/pesquisa-legado")
-    public ResponseEntity<List<Escala>> searchByQueryParamsList(@RequestParam Map<String, String> params) {
-        Optional<List<Escala>> results = escalaService.findByFiltersWithoutPagination(params);
-        return results.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.noContent().build());
-    }
-
-    @PostMapping("/pesquisa-legado")
-    public ResponseEntity<List<Escala>> searchByBodyList(@RequestBody Map<String, String> filters) {
-        Optional<List<Escala>> results = escalaService.findByFiltersWithoutPagination(filters);
-        return results.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.noContent().build());
-    }
     @PutMapping("/popula-voluntarios/{idEscala}")
     public ResponseEntity<Escala> populateVoluntarios(@PathVariable Long idEscala) {
         try {
