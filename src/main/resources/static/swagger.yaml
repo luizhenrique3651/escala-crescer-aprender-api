@@ -36,10 +36,10 @@ paths:
             schema:
               type: object
               properties:
-                username:
+                email:
                   type: string
-                  example: "admin"
-                password:
+                  example: "admin@email.com"
+                senha:
                   type: string
                   format: password
                   example: "senha123"

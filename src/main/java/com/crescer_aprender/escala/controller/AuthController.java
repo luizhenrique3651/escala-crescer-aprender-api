@@ -26,17 +26,17 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) {
-        log.info("Tentativa de login para usuário={}", authRequest.getUsername());
+        log.info("Tentativa de login para usuário={}", authRequest.getEmail());
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getSenha())
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtService.generateToken(userDetails);
-            log.info("Login bem-sucedido para usuário={}", authRequest.getUsername());
+            log.info("Login bem-sucedido para usuário={}", authRequest.getEmail());
             return ResponseEntity.ok(token);
         } catch (Exception e) {
-            log.warn("Falha no login para usuário={}: {}", authRequest.getUsername(), e.getMessage());
+            log.warn("Falha no login para usuário={}: {}", authRequest.getEmail(), e.getMessage());
             // Não expor mensagem de exceção interna ao cliente
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
         }
@@ -44,7 +44,7 @@ public class AuthController {
 
     @Data
     public static class AuthRequest {
-        private String username;
-        private String password;
+        private String email;
+        private String senha;
     }
 }
