@@ -54,6 +54,9 @@ paths:
                 voluntarioId: 1
                 email: "admin@email.com"
                 nome: "Admin"
+                datasDisponiveis:
+                  - '2025-07-05'
+                  - '2025-07-12'
                 role: "COORDENADOR"
                 token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         '401':
@@ -713,6 +716,15 @@ components:
         nome:
           type: string
           example: Admin
+        datasDisponiveis:
+          type: array
+          description: Datas disponíveis do voluntário (LocalDate)
+          items:
+            type: string
+            format: date
+          example:
+            - '2025-07-05'
+            - '2025-07-12'
         role:
           type: string
           example: COORDENADOR

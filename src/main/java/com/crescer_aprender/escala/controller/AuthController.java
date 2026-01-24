@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -60,6 +63,7 @@ public class AuthController {
         private String email;
         private String nome;
         private String role;
+        private List<LocalDate> datasDisponiveis;
         private String token;
 
         public AuthResponse(Voluntario user, String token) {
@@ -67,6 +71,7 @@ public class AuthController {
             this.email = user.getUsuario().getEmail();
             this.nome = user.getNome();
             this.role = user.getUsuario().getRole().name();
+            this.datasDisponiveis = user.getDatasDisponiveis();
             this.token = token;
         }
     }
