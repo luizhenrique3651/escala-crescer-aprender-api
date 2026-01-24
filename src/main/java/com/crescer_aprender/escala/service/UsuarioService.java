@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,5 +47,10 @@ public class UsuarioService {
     public List<Usuario> loadAll() {
         log.info("Carregando todos os usuários do banco");
         return repository.findAll();
+    }
+
+    public Optional<Usuario> findByEmail(String email) {
+        log.info("Procurando usuário por email={}", email);
+        return repository.findByEmail(email);
     }
 }

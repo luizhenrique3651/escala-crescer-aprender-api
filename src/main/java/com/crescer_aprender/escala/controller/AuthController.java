@@ -1,6 +1,10 @@
 package com.crescer_aprender.escala.controller;
 
+import com.crescer_aprender.escala.entity.Usuario;
+import com.crescer_aprender.escala.entity.Voluntario;
+import com.crescer_aprender.escala.exception.UserEmailNotFoundException;
 import com.crescer_aprender.escala.security.JwtService;
+import com.crescer_aprender.escala.service.VoluntarioService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,25 +24,28 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private VoluntarioService voluntarioService;
 
     @Autowired
     private JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
         log.info("Tentativa de login para usuário={}", authRequest.getEmail());
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getSenha())
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            Voluntario userData = voluntarioService.findByUsuarioEmail(authRequest.email).orElseThrow(() -> new UserEmailNotFoundException(authRequest.getEmail()));
             String token = jwtService.generateToken(userDetails);
             log.info("Login bem-sucedido para usuário={}", authRequest.getEmail());
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(new AuthResponse(userData, token));
         } catch (Exception e) {
             log.warn("Falha no login para usuário={}: {}", authRequest.getEmail(), e.getMessage());
             // Não expor mensagem de exceção interna ao cliente
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
 
@@ -46,5 +53,19 @@ public class AuthController {
     public static class AuthRequest {
         private String email;
         private String senha;
+    }
+    @Data
+    public static class AuthResponse {
+        private String email;
+        private String nome;
+        private String role;
+        private String token;
+
+        public AuthResponse(Voluntario user, String token) {
+            this.email = user.getUsuario().getEmail();
+            this.nome = user.getNome();
+            this.role = user.getUsuario().getRole().name();
+            this.token = token;
+        }
     }
 }
