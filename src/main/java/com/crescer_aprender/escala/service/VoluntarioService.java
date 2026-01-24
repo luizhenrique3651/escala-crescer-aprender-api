@@ -141,4 +141,7 @@ public class VoluntarioService {
             throw new EntityNotFoundException("Voluntário", id);
         }
     }
+    public Optional<Voluntario> findByUsuarioEmail(String email){
+        return repository.findByUsuarioEmail(email);
+    }
 }
