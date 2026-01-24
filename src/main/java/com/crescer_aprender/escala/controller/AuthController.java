@@ -56,12 +56,14 @@ public class AuthController {
     }
     @Data
     public static class AuthResponse {
+        private Long voluntarioId;
         private String email;
         private String nome;
         private String role;
         private String token;
 
         public AuthResponse(Voluntario user, String token) {
+            this.voluntarioId = user.getId();
             this.email = user.getUsuario().getEmail();
             this.nome = user.getNome();
             this.role = user.getUsuario().getRole().name();

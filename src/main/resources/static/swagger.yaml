@@ -51,6 +51,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
               example:
+                voluntarioId: 1
                 email: "admin@email.com"
                 nome: "Admin"
                 role: "COORDENADOR"
@@ -702,6 +703,10 @@ components:
     AuthResponse:
       type: object
       properties:
+        voluntarioId:
+          type: integer
+          format: int64
+          example: 1
         email:
           type: string
           example: admin@email.com
