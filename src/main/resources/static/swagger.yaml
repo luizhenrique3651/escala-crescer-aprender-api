@@ -28,7 +28,7 @@ paths:
     post:
       tags:
         - Autenticação
-      summary: Realiza login e retorna o token JWT
+      summary: Realiza login e retorna os dados do usuário e o token JWT
       requestBody:
         required: true
         content:
@@ -45,12 +45,20 @@ paths:
                   example: "senha123"
       responses:
         '200':
-          description: Token JWT gerado com sucesso
+          description: Resposta de autenticação contendo dados do usuário e token JWT
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                $ref: '#/components/schemas/AuthResponse'
+              example:
+                voluntarioId: 1
+                email: "admin@email.com"
+                nome: "Admin"
+                datasDisponiveis:
+                  - '2025-07-05'
+                  - '2025-07-12'
+                role: "COORDENADOR"
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         '401':
           description: Credenciais inválidas
 
@@ -694,6 +702,36 @@ components:
           type: string
         path:
           type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        voluntarioId:
+          type: integer
+          format: int64
+          example: 1
+        email:
+          type: string
+          example: admin@email.com
+        nome:
+          type: string
+          example: Admin
+        datasDisponiveis:
+          type: array
+          description: Datas disponíveis do voluntário (LocalDate)
+          items:
+            type: string
+            format: date
+          example:
+            - '2025-07-05'
+            - '2025-07-12'
+        role:
+          type: string
+          example: COORDENADOR
+        token:
+          type: string
+          description: JWT de autenticação
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 security:
   - bearerAuth: [ ]
