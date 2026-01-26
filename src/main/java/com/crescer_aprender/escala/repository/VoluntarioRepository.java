@@ -22,7 +22,7 @@ public interface VoluntarioRepository extends JpaRepository<Voluntario, Long>{
 
     Optional<Voluntario> findByUsuarioEmail(String email);
 
-
-
+    @Query("SELECT v.datasDisponiveis FROM Voluntario v WHERE v.id = :idVoluntario")
+    List<LocalDate> getDatasDisponiveisByIdVoluntario(Long idVoluntario);
 
 }
