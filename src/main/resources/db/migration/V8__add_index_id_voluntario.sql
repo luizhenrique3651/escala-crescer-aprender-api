@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS id_voluntario_idx ON voluntario (id);

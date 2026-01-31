@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS id_escala_idx ON escala (id);
