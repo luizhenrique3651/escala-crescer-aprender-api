@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS id_usuario_idx ON usuario (id);
