@@ -11,6 +11,7 @@ import com.crescer_aprender.escala.exception.EscalaAlreadyExistsException;
 import com.crescer_aprender.escala.exception.EntityNotFoundException;
 import com.crescer_aprender.escala.exception.InvalidVoluntarioDataException;
 import com.crescer_aprender.escala.exception.VoluntarioNotExistException;
+import com.crescer_aprender.escala.observability.EscalaMetrics;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 
@@ -34,6 +35,9 @@ class EscalaServiceTest {
 
     @Mock
     private VoluntarioRepository voluntarioRepository;
+
+    @Mock
+    private EscalaMetrics escalaMetrics;
 
     @InjectMocks
     private EscalaService escalaService;

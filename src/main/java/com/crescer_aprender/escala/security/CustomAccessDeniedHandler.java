@@ -3,6 +3,8 @@ package com.crescer_aprender.escala.security;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.crescer_aprender.escala.observability.AuthMetrics;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -16,11 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
+    @Autowired
+    private AuthMetrics authMetrics;
+
     @Override
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.warn("Acesso negado para path={} motivo={}", request.getRequestURI(), accessDeniedException.getMessage());
+        authMetrics.incrementAcessoNegado();
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json;charset=UTF-8");
 

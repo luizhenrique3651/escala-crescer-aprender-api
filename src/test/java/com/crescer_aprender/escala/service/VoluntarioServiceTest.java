@@ -4,6 +4,7 @@ import com.crescer_aprender.escala.entity.Usuario;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
 import com.crescer_aprender.escala.exception.*;
+import com.crescer_aprender.escala.observability.VoluntarioMetrics;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import com.crescer_aprender.escala.repository.UsuarioRepository;
@@ -30,6 +31,9 @@ public class VoluntarioServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private VoluntarioMetrics voluntarioMetrics;
 
     @InjectMocks
     private VoluntarioService voluntarioService;

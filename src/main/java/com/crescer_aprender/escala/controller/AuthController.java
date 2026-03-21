@@ -3,6 +3,7 @@ package com.crescer_aprender.escala.controller;
 import com.crescer_aprender.escala.entity.Usuario;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.exception.UserEmailNotFoundException;
+import com.crescer_aprender.escala.observability.AuthMetrics;
 import com.crescer_aprender.escala.security.JwtService;
 import com.crescer_aprender.escala.service.VoluntarioService;
 import lombok.Data;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,6 +31,8 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private VoluntarioService voluntarioService;
+    @Autowired
+    private AuthMetrics authMetrics;
 
     @Autowired
     private JwtService jwtService;
@@ -44,7 +48,12 @@ public class AuthController {
             Voluntario userData = voluntarioService.findByUsuarioEmail(authRequest.email).orElseThrow(() -> new UserEmailNotFoundException(authRequest.getEmail()));
             String token = jwtService.generateToken(userDetails);
             log.info("Login bem-sucedido para usuário={}", authRequest.getEmail());
+            authMetrics.incrementLoginSucesso();
             return ResponseEntity.ok(new AuthResponse(userData, token));
+        } catch (BadCredentialsException e) {
+            log.warn("Falha no login para usuário={}: {}", authRequest.getEmail(), e.getMessage());
+            authMetrics.incrementLoginFalha();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         } catch (Exception e) {
             log.warn("Falha no login para usuário={}: {}", authRequest.getEmail(), e.getMessage());
             // Não expor mensagem de exceção interna ao cliente

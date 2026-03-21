@@ -12,6 +12,8 @@ import com.crescer_aprender.escala.repository.EscalaSpecifications;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
 import com.crescer_aprender.escala.dto.EscalaCreateRequest;
 import com.crescer_aprender.escala.dto.EscalaDiaRequest;
+import com.crescer_aprender.escala.observability.EscalaMetrics;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,11 +31,13 @@ public class EscalaService {
 
     private final EscalaRepository repository;
     private final VoluntarioRepository voluntarioRepository;
+    private final EscalaMetrics escalaMetrics;
 
     @Autowired
-    public EscalaService(EscalaRepository repository, VoluntarioRepository voluntarioRepository) {
+    public EscalaService(EscalaRepository repository, VoluntarioRepository voluntarioRepository, EscalaMetrics escalaMetrics) {
         this.repository = repository;
         this.voluntarioRepository = voluntarioRepository;
+        this.escalaMetrics = escalaMetrics;
     }
 
     public Page<Escala> findByFiltersPaginated(Map<String, String> filters, Pageable pageable) {
@@ -65,17 +69,27 @@ public class EscalaService {
     // novo: salvar a partir de request DTO (recomendado para endpoints)
     @Transactional
     public Escala saveFromRequest(EscalaCreateRequest request) {
-        Escala escala = new Escala();
-        escala.setMes(request.getMes());
-        escala.setAno(request.getAno());
-        escala.setDatas(request.getDatas());
+        Timer.Sample sample = escalaMetrics.iniciarTimer();
+        try {
+            Escala escala = new Escala();
+            escala.setMes(request.getMes());
+            escala.setAno(request.getAno());
+            escala.setDatas(request.getDatas());
 
-        verificaSeHaEscalaCadastradaNaData(escala);
+            verificaSeHaEscalaCadastradaNaData(escala);
 
-        if (request.getIncluirVoluntariosAutomaticamente() != null && request.getIncluirVoluntariosAutomaticamente()) {
-            populaEscalaComDias(escala, request);
+            if (request.getIncluirVoluntariosAutomaticamente() != null && request.getIncluirVoluntariosAutomaticamente()) {
+                populaEscalaComDias(escala, request);
+            }
+            Escala resultado = repository.save(escala);
+            escalaMetrics.incrementCriadas();
+            return resultado;
+        } catch (Exception e) {
+            escalaMetrics.incrementCriacaoFalha();
+            throw e;
+        } finally {
+            escalaMetrics.finalizarTimer(sample);
         }
-        return repository.save(escala);
     }
 
     @Transactional
@@ -126,6 +140,7 @@ public class EscalaService {
     public boolean delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
+            escalaMetrics.incrementDeletadas();
             return true;
         } else {
             throw new EntityNotFoundException("Escala", id);
