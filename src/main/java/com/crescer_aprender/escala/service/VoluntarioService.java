@@ -5,6 +5,7 @@ import com.crescer_aprender.escala.entity.EscalaDia;
 import com.crescer_aprender.escala.entity.Voluntario;
 import com.crescer_aprender.escala.enums.PerfisUsuariosEnum;
 import com.crescer_aprender.escala.exception.*;
+import com.crescer_aprender.escala.observability.VoluntarioMetrics;
 import com.crescer_aprender.escala.repository.EscalaRepository;
 import com.crescer_aprender.escala.repository.UsuarioRepository;
 import com.crescer_aprender.escala.repository.VoluntarioRepository;
@@ -28,13 +29,15 @@ public class VoluntarioService {
     private final EscalaRepository escalaRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VoluntarioMetrics voluntarioMetrics;
 
     @Autowired
-    public VoluntarioService(VoluntarioRepository repository, EscalaRepository escalaRepository, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public VoluntarioService(VoluntarioRepository repository, EscalaRepository escalaRepository, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, VoluntarioMetrics voluntarioMetrics) {
         this.repository = repository;
         this.escalaRepository = escalaRepository;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.voluntarioMetrics = voluntarioMetrics;
     }
 
     @Transactional
@@ -76,6 +79,7 @@ public class VoluntarioService {
 
         Voluntario saved = repository.save(voluntario);
         log.info("Voluntário salvo com sucesso id={}", saved.getId());
+        voluntarioMetrics.incrementCadastrados();
         return saved;
     }
 
@@ -135,6 +139,7 @@ public class VoluntarioService {
             }
             repository.deleteById(id);
             log.info("Voluntário deletado com sucesso id={}", id);
+            voluntarioMetrics.incrementDeletados();
             return true;
         } else {
             log.warn("Falha ao deletar voluntário id={} - não encontrado", id);
