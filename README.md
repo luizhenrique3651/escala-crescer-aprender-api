@@ -1,188 +1,98 @@
-# Escala API
+# Escala API (Projeto Crescer e Aprender)
 
-**Escala API** é uma API REST desenvolvida em Java com Spring Boot para facilitar o cadastro e o controle de escalas de voluntários do projeto social **Crescer e Aprender**. Esse projeto tem como missão oferecer aulas gratuitas de **Informática**, **Matemática** e **Língua Portuguesa** para crianças em situação de vulnerabilidade social.
-
----
-
-## 💡 Propósito
-
-Todos os sábados, o projeto realiza aulas presenciais com as crianças, e para garantir o bom andamento dessas atividades, é necessário organizar a participação dos voluntários de forma equilibrada e eficiente. Com um grupo de aproximadamente **40 voluntários ativos**, é essencial distribuir a escala de maneira que:
-
-- Cada aula tenha **no mínimo 4** e **no máximo 8 voluntários**.
-- A disponibilidade dos voluntários seja respeitada.
-- A escala do mês seja gerada com antecedência, de forma justa e transparente.
-
-A API automatiza esse processo de organização, permitindo:
-
-- Cadastro de voluntários e suas disponibilidades.
-- Definição das datas de aula por mês.
-- Geração automática de escalas conforme regras definidas.
-- Visualização de escalas por data ou por voluntário.
+**Escala API** é uma solução robusta desenvolvida em **Java 21** e **Spring Boot 3.5.10** para a orquestração e gestão de voluntários do projeto social **Crescer e Aprender**. O projeto visa automatizar a distribuição de voluntários em aulas semanais, garantindo o cumprimento de regras sociais e operacionais críticas.
 
 ---
 
-## 🛠️ Tecnologias e Stacks
+## 💡 Missão e Regras de Negócio
+O projeto social atende crianças em situação de vulnerabilidade com aulas de Informática, Matemática e Português. Para manter a qualidade pedagógica e segurança, a API impõe as seguintes regras:
 
-- **Java 21**
-- **Spring Boot 3.4.3**
-- **Spring Data JPA**
-- **Flyway** para migrações de banco de dados
-- **PostgreSQL**
-- **Lombok**
-- **Swagger (OpenAPI 3)** para documentação de endpoints
-- **JUnit 5** para testes unitários
-- **Docker Compose** para subir aplicação e banco de dados de uma vez
+- **Regra de Ouro**: As aulas e escalas ocorrem **estritamente aos sábados**.
+- **Capacidade Controlada**: Cada aula deve ter no mínimo **4** e no máximo **8** voluntários.
+- **Justiça na Escala**: O sistema prioriza voluntários com menor número de alocações no período.
+- **Imutabilidade**: Voluntários com escalas futuras não podem ser removidos do sistema.
 
 ---
 
-## ✅ Funcionalidades
-
-- [x] **Cadastro de Voluntários**
-- [x] **Registro de disponibilidade** dos voluntários
-- [x] **Cadastro de datas de aulas**
-- [x] **Geração automática da escala**
-- [x] **Visualização da escala por data**
-- [x] **Visualização da escala por voluntário**
-- [x] **Edição manual da escala**
-- [x] **Autenticação e autorização para administradores/coordenação**
-
-> Observação: A funcionalidade de autenticação/autorizações foi implementada via JWT. Endpoints protegidos exigem o cabeçalho `Authorization: Bearer <token>` e controles de acesso por role (por exemplo, `COORDENADOR`).
+## 🛠️ Stack Tecnológica de Alta Performance
+- **Linguagem**: Java 21 (Uso intensivo de Records e Pattern Matching).
+- **Framework**: Spring Boot 3.5.10.
+- **Persistência**: Spring Data JPA com PostgreSQL.
+- **Migrações**: Flyway (Versionamento de schema).
+- **Segurança**: Spring Security + JWT (Stateless) com Roles (`COORDENADOR`, `VOLUNTARIO`).
+- **Qualidade**: SonarQube (Análise Estática) e JaCoCo (Cobertura de Código).
+- **Documentação**: Swagger/OpenAPI 3.
 
 ---
 
-## ▶️ Como Rodar o projeto
-Na pasta raiz do projeto, execute:
+## 📊 Qualidade e Observabilidade
+O projeto possui uma infraestrutura de qualidade integrada via Docker:
+
+- **SonarQube**: Dashboard de qualidade em `localhost:9000` (Persistido em PostgreSQL).
+- **JaCoCo**: Meta de cobertura de código > 80%.
+- **Automação**: Script `./run-analysis.sh` na raiz para disparo de ciclo completo (Build -> Test -> Coverage -> Sonar).
+
+---
+
+## 🚀 Como Executar o Ecossistema
+
+### 1. Ambiente Docker (Completo)
+Sobe a API, o Banco de Dados e o Servidor de Qualidade:
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
-ou, localmente sem Docker(necessário servidor postgree ativo e variáveis de ambiente configuradas no 'application.properties'):
+
+### 2. Disparar Análise de Qualidade
+Para rodar todos os testes unitários e enviar o relatório ao SonarQube:
 ```bash
-./mvnw -DskipTests package
-java -jar target/escala-0.0.1-SNAPSHOT.jar
+./run-analysis.sh
+```
+
+### 3. Desenvolvimento Local (Maven)
+```bash
+./mvnw spring-boot:run
 ```
 
 ---
 
-## 📚 Endpoints da API
+## ✅ Funcionalidades Principais
 
-### 🔹 Autenticação
-- `POST /auth/login` — Faz login e retorna um token JWT (string no corpo). Exemplo de request body:
-```json
-{ "username": "email@exemplo.com", "password": "senha" }
-```
-Resposta: token JWT em texto puro (200) ou 401 em caso de credenciais inválidas.
-
-### 🔹 Voluntários
-- `GET /crescer-aprender/voluntarios` — Lista todos os voluntários
-- `GET /crescer-aprender/voluntarios/{id}` — Retorna voluntário por ID
-- `POST /crescer-aprender/voluntarios` — Cria um novo voluntário (requer role `COORDENADOR`)
-- `PUT /crescer-aprender/voluntarios/{id}` — Atualiza um voluntário
-- `DELETE /crescer-aprender/voluntarios/{id}` — Remove um voluntário (não pode estar escalado; requer `COORDENADOR`)
-
-### 🔹 Escalas
-- `GET /crescer-aprender/escala` — Lista todas as escalas
-- `GET /crescer-aprender/escala/byId/{id}` — Retorna a escala por ID
-- `GET /crescer-aprender/escala/byDate/{data}` — Busca escala por data (formato: `yyyy-MM-dd`)
-- `GET /crescer-aprender/escala/buscar-por-mes-ano-voluntario?mes={mes}&ano={ano}&idVoluntario={id}` — Busca escala por mês, ano e voluntário
-- `POST /crescer-aprender/escala` — Gera uma nova escala (requer `COORDENADOR`)
-- `PUT /crescer-aprender/escala/{id}` — Edita uma escala existente (requer `COORDENADOR`)
-- `DELETE /crescer-aprender/escala/{id}` — Deleta uma escala por ID (requer `COORDENADOR`)
+- [x] **Geração Balanceada**: Motor que gera sugestões de escala baseadas em disponibilidade e frequência.
+- [x] **@IsSaturday**: Validação customizada via Bean Validation para datas.
+- [x] **CapacityGuard**: Componente de segurança para limites de voluntários.
+- [x] **Segurança JWT**: Endpoints de coordenação protegidos por roles.
+- [x] **CRUD Completo**: Gestão de Voluntários, Escalas e Usuários.
 
 ---
 
-## 🛡️ Segurança e uso do Swagger
+## 📚 Endpoints Estratégicos
 
-A documentação interativa do Swagger está disponível em:
-```
-http://localhost:8080/swagger-ui/index.html
-```
+### Geração de Sugestão
+- `POST /crescer-aprender/escala/gerar-sugestao` — Gera uma proposta de escala balanceada para uma lista de datas.
 
-No Swagger UI use o botão **Authorize** e cole o token no formato:
-```
-Bearer <TOKEN>
-```
-Depois de autorizado, as operações protegidas aceitarão o cabeçalho automaticamente.
+### Autenticação
+- `POST /auth/login` — Autentica e retorna o perfil detalhado do voluntário.
 
----
-
-## ⚠️ Tratamento de Erros
-
-A aplicação utiliza exceções customizadas para fornecer mensagens claras e específicas. Além disso, respostas de segurança (401/403) são padronizadas em JSON com o schema `ErrorResponse`.
-
-Exceções customizadas existentes (respostas e quando são lançadas):
-
-- `EntityNotFoundException` – quando uma entidade não é localizada.
-- `EmailAlreadyExistsException` – e-mail de voluntário já está em uso.
-- `VoluntarioIsScheduledException` – impede exclusão de voluntário escalado.
-- `EscalaAlreadyExistsException` – evita duplicidade de escalas por mês/ano.
-- `InvalidVoluntarioDataException` – dados inválidos no cadastro.
-- `DatabaseException` – falha ao acessar o banco de dados.
-
-Erros de autenticação/autorização (padronizados):
-- 401 Unauthorized — quando o token está ausente ou inválido (handled by `CustomAuthenticationEntryPoint`).
-- 403 Forbidden — quando o usuário está autenticado, mas não tem permissão para o recurso (handled by `CustomAccessDeniedHandler`).
-
-Exemplo de `ErrorResponse` (JSON):
-```json
-{
-  "timestamp": "2025-10-25T06:46:38.123Z",
-  "status": 403,
-  "error": "Forbidden",
-  "message": "Você não tem permissão para acessar este recurso",
-  "path": "/crescer-aprender/voluntarios"
-}
-```
+### Gestão de Escalas
+- `GET /crescer-aprender/escala/byDate/{data}` — Busca escalas para um sábado específico.
+- `PUT /crescer-aprender/escala/popula-voluntarios/{id}` — Popula automaticamente uma escala vazia.
 
 ---
 
-## 🔎 Documentação Swagger
+## 🛡️ Segurança e Documentação
+A documentação interativa está disponível em:
+`http://localhost:8080/swagger-ui/index.html`
 
-A API possui uma documentação interativa disponível via Swagger UI, acessível em:
-
-```
-http://localhost:8080/swagger-ui/index.html
-```
-
-Por essa interface você pode:
-
-- Consultar todos os endpoints disponíveis
-- Visualizar exemplos de requisições e respostas
-- Testar chamadas diretamente pelo navegador (lembre-se de autorizar com o token JWT)
-
-```
-o usuario padrão é: 
-admin@email.com 
-e a senha é:
-cresceraprender
-```
--   *essa senha deve ser deletada após criados os primeiros usuários administradores*
----
-
-## 📌 Sobre o Projeto Crescer e Aprender
-
-O **Crescer e Aprender** é um projeto social voltado para a educação de crianças em situação de vulnerabilidade, proporcionando um ambiente de acolhimento e desenvolvimento por meio da educação e do voluntariado. Acreditamos que a **educação é a base para transformação social**.
+**Usuário Padrão**: `admin@email.com` / `cresceraprender`
 
 ---
 
-## 🤝 Contribuições
-
-Este projeto é **open source** e colaborações são muito bem-vindas! Para contribuir:
-
-1. Faça um fork do projeto.
-2. Crie sua branch: `git checkout -b minha-contribuicao`
-3. Envie um pull request para revisão.
+## 📌 Sobre o Crescer e Aprender
+Um projeto social que acredita na **educação como base para transformação social**. Este software é uma ferramenta para potencializar o impacto dessa missão.
 
 ---
 
-## 📝 Possíveis Melhorias Futuras
-
-- Adicionar paginação e ordenação em *todas* consultas
-- Criar testes de integração que validem fluxos de autenticação e autorização
-
----
-
-## 📞 Contato
-
-- Desenvolvedor: Luiz Henrique
-- GitHub: [luizhenrique3651/escala-crescer-aprender-api](https://github.com/luizhenrique3651/escala-crescer-aprender-api)
-- Instagram do projeto: [proj_crescereaprender](https://www.instagram.com/proj_crescereaprender/)
+## 📞 Contato e Contribuição
+- **Desenvolvedor**: Luiz Henrique
+- **GitHub**: [luizhenrique3651](https://github.com/luizhenrique3651)
+- **Instagram**: [@proj_crescereaprender](https://www.instagram.com/proj_crescereaprender/)
