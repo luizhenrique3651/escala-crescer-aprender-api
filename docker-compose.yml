@@ -29,8 +29,30 @@ services:
     networks:
       - escala-net
 
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: escala-sonar
+    depends_on:
+      - db
+    ports:
+      - "9000:9000"
+    networks:
+      - escala-net
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://db:5432/crescer-aprender-db
+      - SONAR_JDBC_USERNAME=luiz
+      - SONAR_JDBC_PASSWORD=luiz123
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
 networks:
   escala-net:
 
 volumes:
   pgdata:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
